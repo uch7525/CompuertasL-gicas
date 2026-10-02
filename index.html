@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Compuertas Lógicas — Laboratorio Interactivo</title>
+<style>
+  :root {
+    --bg: #0f172a;
+    --card: #1e293b;
+    --accent: #22d3ee;
+    --accent2: #a78bfa;
+    --green: #34d399;
+    --red: #f87171;
+    --yellow: #fbbf24;
+    --text: #e2e8f0;
+    --muted: #94a3b8;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    padding: 20px;
+  }
+  .app { width: 100%; max-width: 900px; }
+  .header {
+    text-align: center;
+    padding: 30px 20px;
+    background: linear-gradient(135deg, #1e293b, #0f172a);
+    border-radius: 20px;
+    border: 1px solid #334155;
+    margin-bottom: 20px;
+  }
+  .header h1 {
+    font-size: 1.8rem;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .header p { color: var(--muted); margin-top: 8px; font-size: 0.95rem; }
+  .progress-bar {
+    height: 8px;
+    background: #334155;
+    border-radius: 10px;
+    margin-top: 16px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    width: 0%;
+    transition: width 0.5s ease;
+  }
+  .card {
+    background: var(--card);
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 20px;
+    border: 1px solid #334155;
+    animation: fadeIn 0.4s ease;
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .hidden { display: none !important; }
+  h2 { color: var(--accent); margin-bottom: 12px; font-size: 1.3rem; }
+  h3 { color: var(--accent2); margin: 16px 0 8px; font-size: 1.1rem; }
+  p { line-height: 1.6; color: var(--text); margin-bottom: 10px; }
+  .btn {
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    color: #0f172a;
+    border: none;
+    padding: 12px 28px;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    margin: 6px 4px;
+  }
+  .btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(34,211,238,0.3); }
+  .btn-secondary {
+    background: transparent;
+    border: 1px solid var(--accent);
+    color: var(--accent);
+  }
+  .btn-secondary:hover { background: rgba(34,211,238,0.1); }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+  .gate-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+    margin-top: 16px;
+  }
+  .gate-card {
+    background: #0f172a;
+    border-radius: 12px;
+    padding: 18px;
+    border: 1px solid #334155;
+    text-align: center;
+    transition: border-color 0.3s;
+  }
+  .gate-card.active { border-color: var(--accent); box-shadow: 0 0 20px rgba(34,211,238,0.2); }
+  .gate-symbol {
+    font-size: 2rem;
+    font-weight: 900;
+    color: var(--accent);
+    margin: 10px 0;
+    font-family: 'Courier New', monospace;
+  }
+  .overline {
+    text-decoration: overline;
+    text-decoration-thickness: 2px;
+    padding: 0 2px;
+  }
+  .truth-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+    font-size: 0.9rem;
+  }
+  .truth-table th, .truth-table td {
+    border: 1px solid #334155;
+    padding: 8px;
+    text-align: center;
+  }
+  .truth-table th { background: #1e293b; color: var(--accent); }
+  .truth-table td { background: #0f172a; }
+  .toggle-row {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    margin: 12px 0;
+    flex-wrap: wrap;
+  }
+  .toggle-btn {
+    padding: 10px 20px;
+    border-radius: 10px;
+    border: 2px solid #334155;
+    background: #0f172a;
+    color: var(--text);
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s;
+    min-width: 70px;
+  }
+  .toggle-btn.on {
+    background: var(--green);
+    border-color: var(--green);
+    color: #0f172a;
+  }
+  .output-display {
+    font-size: 2rem;
+    font-weight: 900;
+    padding: 10px 30px;
+    border-radius: 12px;
+    display: inline-block;
+    margin: 10px auto;
+    min-width: 100px;
+    transition: all 0.3s;
+  }
+  .output-1 { background: var(--green); color: #0f172a; }
+  .output-0 { background: #334155; color: var(--muted); }
+  .quiz-option {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 12px 16px;
+    margin: 8px 0;
+    border-radius: 10px;
+    border: 2px solid #334155;
+    background: #0f172a;
+    color: var(--text);
+    cursor: pointer;
+    font-size: 0.95rem;
+    transition: all 0.2s;
+  }
+  .quiz-option:hover { border-color: var(--accent); }
+  .quiz-option.correct { background: rgba(52,211,153,0.2); border-color: var(--green); }
+  .quiz-option.incorrect { background: rgba(248,113,113,0.2); border-color: var(--red); }
+  .feedback {
+    padding: 12px;
+    border-radius: 10px;
+    margin-top: 10px;
+    font-size: 0.9rem;
+  }
+  .feedback.ok { background: rgba(52,211,153,0.15); border-left: 4px solid var(--green); }
+  .feedback.err { background: rgba(248,113,113,0.15); border-left: 4px solid var(--red); }
+  .score-box { text-align: center; padding: 30px; }
+  .score-box .big { font-size: 3.5rem; font-weight: 900; color: var(--accent); }
+  .tag {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    background: rgba(167,139,250,0.2);
+    color: var(--accent2);
+    margin: 4px 4px 4px 0;
+  }
+  @media (max-width: 600px) {
+    .header h1 { font-size: 1.3rem; }
+    .gate-symbol { font-size: 1.5rem; }
+    .output-display { font-size: 1.5rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <div class="header">
+    <h1>⚡ Compuertas Lógicas</h1>
+    <p>Laboratorio Interactivo — Arquitectura de Computadoras</p>
+    <p style="font-size:0.8rem; margin-top:4px;">IES N° 5 "José Eugenio Tello" — San Salvador de Jujuy</p>
+    <div class="progress-bar"><div class="progress-fill" id="progress"></div></div>
+  </div>
+
+  <div class="card" id="screen-inicio">
+    <h2>🎯 Objetivo del recurso</h2>
+    <p>Identificar, diferenciar y aplicar las compuertas lógicas <strong>AND, OR, NOT, NAND, NOR, XOR y XNOR</strong> mediante la resolución de ejercicios interactivos, desarrollando las capacidades de <strong>abstracción</strong> y <strong>razonamiento inferencial</strong> requeridas en tu perfil profesional como Técnico Superior en Soporte de Infraestructura de TI.</p>
+    <div style="margin-top:12px;">
+      <span class="tag">AND</span>
+      <span class="tag">OR</span>
+      <span class="tag">NOT</span>
+      <span class="tag">NAND</span>
+      <span class="tag">NOR</span>
+      <span class="tag">XOR</span>
+      <span class="tag">XNOR</span>
+    </div>
+    <div style="text-align:center; margin-top:24px;">
+      <button class="btn" onclick="goTo('basicas')">Comenzar →</button>
+    </div>
+  </div>
+
+  <div class="card hidden" id="screen-basicas">
+    <h2>🔌 Compuertas Básicas: AND, OR, NOT</h2>
+    <p>Hacé clic en las entradas A y B para ver cómo cambia la salida en cada compuerta.</p>
+    <div class="gate-grid" id="basic-gates"></div>
+    <div style="text-align:center; margin-top:20px;">
+      <button class="btn btn-secondary" onclick="goTo('inicio')">← Volver</button>
+      <button class="btn" onclick="goTo('derivadas')">Siguiente: Derivadas →</button>
+    </div>
+  </div>
+
+  <div class="card hidden" id="screen-derivadas">
+    <h2>🧩 Compuertas Derivadas: NAND, NOR, XOR, XNOR</h2>
+    <p>Estas compuertas combinan las básicas y son la base de circuitos más complejos.</p>
+    <div class="gate-grid" id="derived-gates"></div>
+    <div style="text-align:center; margin-top:20px;">
+      <button class="btn btn-secondary" onclick="goTo('basicas')">← Volver</button>
+      <button class="btn" onclick="goTo('laboratorio')">Siguiente: Laboratorio →</button>
+    </div>
+  </div>
+
+  <div class="card hidden" id="screen-laboratorio">
+    <h2>🔬 Laboratorio: Identificá la Compuerta</h2>
+    <p>Se te muestra una tabla de verdad. Elegí qué compuerta lógica la produce.</p>
+    <div id="lab-question" style="text-align:center;">
+      <h3>Tabla de Verdad</h3>
+      <table class="truth-table" style="max-width:300px; margin:0 auto;" id="lab-truth-table"></table>
+      <div style="margin-top:20px;">
+        <p style="font-weight:700;">¿Qué compuerta es?</p>
+        <div id="lab-options" style="display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin-top:12px;"></div>
+      </div>
+      <div id="lab-feedback" style="margin-top:16px;"></div>
+    </div>
+    <div style="text-align:center; margin-top:20px;">
+      <button class="btn btn-secondary" onclick="goTo('derivadas')">← Volver</button>
+      <button class="btn" id="lab-next" style="display:none;" onclick="nextLab()">Siguiente ejercicio →</button>
+      <button class="btn hidden" id="lab-to-quiz" onclick="goTo('quiz')">Ir a la Evaluación →</button>
+    </div>
+  </div>
+
+  <div class="card hidden" id="screen-quiz">
+    <h2>📝 Evaluación Final</h2>
+    <p>Respondé las siguientes preguntas. Tenés retroalimentación inmediata.</p>
+    <div id="quiz-container"></div>
+    <div style="text-align:center; margin-top:20px;">
+      <button class="btn btn-secondary" onclick="goTo('laboratorio')">← Volver</button>
+      <button class="btn" id="btn-resultado" style="display:none;" onclick="mostrarResultado()">Ver Resultado →</button>
+    </div>
+  </div>
+
+  <div class="card hidden" id="screen-resultado">
+    <div class="score-box">
+      <h2>🏁 Resultado Final</h2>
+      <div class="big" id="final-score">0/8</div>
+      <p id="final-message" style="font-size:1.1rem; margin-top:12px;"></p>
+      <div style="margin-top:20px;">
+        <button class="btn" onclick="reiniciar()">🔄 Volver a intentar</button>
+        <button class="btn btn-secondary" onclick="goTo('inicio')">🏠 Inicio</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============ DATOS ============
+const basicGates = [
+  { name: 'AND', symbol: 'A · B', expr: 'A AND B', fn: (a,b) => (a === 1 && b === 1) ? 1 : 0, color: '#22d3ee' },
+  { name: 'OR',  symbol: 'A + B', expr: 'A OR B',  fn: (a,b) => (a === 1 || b === 1) ? 1 : 0, color: '#a78bfa' },
+  { name: 'NOT', symbol: '<span class="overline">A</span>', expr: 'NOT A (inversor)', fn: (a) => a === 1 ? 0 : 1, color: '#fbbf24' }
+];
+
+const derivedGates = [
+  { name: 'NAND', symbol: '<span class="overline">(A · B)</span>', expr: 'NOT (A AND B)', fn: (a,b) => !(a === 1 && b === 1) ? 1 : 0, color: '#34d399' },
+  { name: 'NOR',  symbol: '<span class="overline">(A + B)</span>', expr: 'NOT (A OR B)',  fn: (a,b) => !(a === 1 || b === 1) ? 1 : 0, color: '#f87171' },
+  { name: 'XOR',  symbol: 'A ⊕ B', expr: 'A OR B, pero no ambas', fn: (a,b) => (a !== b) ? 1 : 0, color: '#f472b6' },
+  { name: 'XNOR', symbol: '<span class="overline">(A ⊕ B)</span>', expr: 'NOT (A XOR B)', fn: (a,b) => (a === b) ? 1 : 0, color: '#38bdf8' }
+];
+
+const labExercises = [
+  { inputs: [[0,0],[0,1],[1,0],[1,1]], outputs: [0,0,0,1], answer: 'AND' },
+  { inputs: [[0,0],[0,1],[1,0],[1,1]], outputs: [0,1,1,1], answer: 'OR' },
+  { inputs: [[0,0],[0,1],[1,0],[1,1]], outputs: [1,1,1,0], answer: 'NAND' },
+  { inputs: [[0,0],[0,1],[1,0],[1,1]], outputs: [1,0,0,0], answer: 'NOR' },
+  { inputs: [[0,0],[0,1],[1,0],[1,1]], outputs: [0,1,1,0], answer: 'XOR' },
+  { inputs: [[0,0],[0,1],[1,0],[1,1]], outputs: [1,0,0,1], answer: 'XNOR' }
+];
+
+const quizQuestions = [
+  { q: '¿Cuál es la salida de una compuerta AND cuando A=1 y B=0?',
+    opts: ['1', '0', 'Depende', 'No se puede saber'], correct: 1,
+    fb: 'La compuerta AND solo da salida 1 cuando TODAS las entradas son 1. Como B=0, la salida es 0.' },
+  { q: '¿Qué compuerta produce una salida 1 cuando TODAS las entradas son 0?',
+    opts: ['AND', 'OR', 'NOR', 'XOR'], correct: 2,
+    fb: 'La compuerta NOR es la inversa de OR. OR da 0 cuando todas las entradas son 0; NOR invierte eso y da 1.' },
+  { q: '¿Cuál es la función de la compuerta NOT?',
+    opts: ['Suma lógica', 'Producto lógico', 'Inversión lógica', 'Comparación'], correct: 2,
+    fb: 'La compuerta NOT (inversor) cambia el valor de entrada: si entra 1, sale 0; si entra 0, sale 1.' },
+  { q: 'Si A=1 y B=1, ¿cuál es la salida de una compuerta XOR?',
+    opts: ['0', '1', 'Depende', 'Indefinido'], correct: 0,
+    fb: 'XOR da salida 1 solo cuando las entradas son DIFERENTES. Si A=1 y B=1 (iguales), la salida es 0.' },
+  { q: '¿Cuál de estas compuertas es la inversa de NAND?',
+    opts: ['NOR', 'AND', 'OR', 'XNOR'], correct: 1,
+    fb: 'NAND = NOT (A AND B). Su inversa es AND. Si invertís dos veces, volvés al AND original.' },
+  { q: '¿Qué compuerta da salida 1 cuando las dos entradas son iguales?',
+    opts: ['XOR', 'XNOR', 'NAND', 'NOR'], correct: 1,
+    fb: 'XNOR es la inversa de XOR. Mientras XOR da 1 cuando son diferentes, XNOR da 1 cuando son iguales.' },
+  { q: '¿Cuál es la expresión booleana de la compuerta NOR?',
+    opts: ['A + B', '<span class="overline">(A + B)</span>', 'A · B', '<span class="overline">(A · B)</span>'], correct: 1,
+    fb: 'NOR = NOT (A OR B) = <span class="overline">(A + B)</span>. Es la inversión de la suma lógica.' },
+  { q: '¿Por qué se dice que NAND y NOR son "compuertas universales"?',
+    opts: ['Porque son las más rápidas', 'Porque con ellas se pueden construir todas las demás', 'Porque funcionan con cualquier voltaje', 'Porque son las más baratas'], correct: 1,
+    fb: 'NAND y NOR son universales porque con solo usar una de ellas (y repetirla) se pueden implementar AND, OR y NOT.' }
+];
+
+// ============ ESTADO ============
+const gateState = {};  // { 'basic-0': {a:0, b:0}, 'derived-2': {a:1, b:0}, ... }
+let currentLab = 0;
+let labAnswered = false;
+let quizIndex = 0;
+let quizScore = 0;
+let quizAnswered = false;
+
+// ============ NAVEGACIÓN ============
+function goTo(screen) {
+  document.querySelectorAll('.card').forEach(c => c.classList.add('hidden'));
+  const el = document.getElementById('screen-' + screen);
+  if (el) el.classList.remove('hidden');
+  if (screen === 'basicas') renderBasicGates();
+  if (screen === 'derivadas') renderDerivedGates();
+  if (screen === 'laboratorio') { currentLab = 0; labAnswered = false; renderLab(); }
+  if (screen === 'quiz') { quizIndex = 0; quizScore = 0; quizAnswered = false; renderQuiz(); }
+  updateProgress(screen);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function updateProgress(screen) {
+  const steps = { inicio: 0, basicas: 25, derivadas: 50, laboratorio: 75, quiz: 90, resultado: 100 };
+  document.getElementById('progress').style.width = (steps[screen] || 0) + '%';
+}
+
+// ============ COMPUERTAS ============
+function renderBasicGates() {
+  const container = document.getElementById('basic-gates');
+  container.innerHTML = '';
+  basicGates.forEach((g, i) => {
+    delete gateState['basic-' + i];  // resetea estado
+    container.innerHTML += createGateCard(g, i, 'basic');
+  });
+}
+
+function renderDerivedGates() {
+  const container = document.getElementById('derived-gates');
+  container.innerHTML = '';
+  derivedGates.forEach((g, i) => {
+    delete gateState['derived-' + i];  // resetea estado
+    container.innerHTML += createGateCard(g, i, 'derived');
+  });
+}
+
+function createGateCard(g, idx, prefix) {
+  const isNot = g.name === 'NOT';
+  return `
+    <div class="gate-card" id="${prefix}-gate-${idx}">
+      <div style="font-weight:700; color:${g.color}; font-size:1.1rem;">${g.name}</div>
+      <div class="gate-symbol">${g.symbol}</div>
+      <div style="font-size:0.8rem; color:var(--muted); margin-bottom:10px;">${g.expr}</div>
+      <div class="toggle-row">
+        <button class="toggle-btn" id="btn-${prefix}-${idx}-a" onclick="toggleInput('${prefix}', ${idx}, 'a')">A: 0</button>
+        ${!isNot ? `<button class="toggle-btn" id="btn-${prefix}-${idx}-b" onclick="toggleInput('${prefix}', ${idx}, 'b')">B: 0</button>` : ''}
+      </div>
+      <div style="text-align:center;">
+        <div class="output-display output-0" id="out-${prefix}-${idx}">Salida: 0</div>
+      </div>
+      <table class="truth-table" style="margin-top:12px;">
+        <tr><th>A</th>${!isNot ? '<th>B</th>' : ''}<th>Salida</th></tr>
+        ${isNot 
+          ? `<tr><td>0</td><td>1</td></tr><tr><td>1</td><td>0</td></tr>`
+          : `<tr><td>0</td><td>0</td><td>${g.fn(0,0)}</td></tr>
+             <tr><td>0</td><td>1</td><td>${g.fn(0,1)}</td></tr>
+             <tr><td>1</td><td>0</td><td>${g.fn(1,0)}</td></tr>
+             <tr><td>1</td><td>1</td><td>${g.fn(1,1)}</td></tr>`
+        }
+      </table>
+    </div>`;
+}
+
+function toggleInput(prefix, idx, input) {
+  const key = `${prefix}-${idx}`;
+  
+  // Inicializar estado si no existe
+  if (!gateState[key]) gateState[key] = { a: 0, b: 0 };
+  
+  // Cambiar el valor (toggle)
+  gateState[key][input] = gateState[key][input] === 1 ? 0 : 1;
+  
+  // Actualizar el botón
+  const btn = document.getElementById(`btn-${prefix}-${idx}-${input}`);
+  const newVal = gateState[key][input];
+  btn.textContent = input.toUpperCase() + ': ' + newVal;
+  btn.classList.toggle('on', newVal === 1);
+  
+  // Calcular la salida
+  const gate = prefix === 'basic' ? basicGates[idx] : derivedGates[idx];
+  const a = gateState[key].a;
+  const b = gateState[key].b;
+  
+  let out;
+  if (gate.name === 'NOT') {
+    out = gate.fn(a);
+  } else {
+    out = gate.fn(a, b);
+  }
+  
+  // Actualizar el display de salida
+  const outEl = document.getElementById(`out-${prefix}-${idx}`);
+  outEl.textContent = 'Salida: ' + out;
+  outEl.className = 'output-display ' + (out === 1 ? 'output-1' : 'output-0');
+}
+
+// ============ LABORATORIO ============
+function renderLab() {
+  const ex = labExercises[currentLab];
+  const table = document.getElementById('lab-truth-table');
+  table.innerHTML = '<tr><th>A</th><th>B</th><th>Salida</th></tr>';
+  ex.inputs.forEach((inp, i) => {
+    table.innerHTML += `<tr><td>${inp[0]}</td><td>${inp[1]}</td><td>${ex.outputs[i]}</td></tr>`;
+  });
+
+  const opts = document.getElementById('lab-options');
+  opts.innerHTML = '';
+  ['AND', 'OR', 'NAND', 'NOR', 'XOR', 'XNOR'].forEach(g => {
+    const btn = document.createElement('button');
+    btn.className = 'toggle-btn';
+    btn.textContent = g;
+    btn.style.minWidth = '80px';
+    btn.onclick = () => checkLab(g, btn);
+    opts.appendChild(btn);
+  });
+
+  document.getElementById('lab-feedback').innerHTML = '';
+  document.getElementById('lab-next').style.display = 'none';
+  document.getElementById('lab-to-quiz').classList.add('hidden');
+  labAnswered = false;
+}
+
+function checkLab(selected, btn) {
+  if (labAnswered) return;
+  labAnswered = true;
+  const ex = labExercises[currentLab];
+  const fb = document.getElementById('lab-feedback');
+  if (selected === ex.answer) {
+    btn.classList.add('correct');
+    fb.innerHTML = `<div class="feedback ok">✅ ¡Correcto! La tabla corresponde a la compuerta <strong>${ex.answer}</strong>.</div>`;
+    if (currentLab < labExercises.length - 1) {
+      document.getElementById('lab-next').style.display = 'inline-block';
+    } else {
+      document.getElementById('lab-to-quiz').classList.remove('hidden');
+    }
+  } else {
+    btn.classList.add('incorrect');
+    fb.innerHTML = `<div class="feedback err">❌ Incorrecto. La respuesta correcta era <strong>${ex.answer}</strong>. Revisá la tabla de verdad y las propiedades de cada compuerta.</div>`;
+    document.getElementById('lab-next').style.display = 'inline-block';
+  }
+}
+
+function nextLab() {
+  if (currentLab < labExercises.length - 1) { currentLab++; renderLab(); }
+}
+
+// ============ QUIZ ============
+function renderQuiz() {
+  const container = document.getElementById('quiz-container');
+  container.innerHTML = '';
+  document.getElementById('btn-resultado').style.display = 'none';
+  quizAnswered = false;
+
+  if (quizIndex >= quizQuestions.length) {
+    document.getElementById('btn-resultado').style.display = 'inline-block';
+    return;
+  }
+
+  const q = quizQuestions[quizIndex];
+  let html = `<p style="font-weight:700; margin-bottom:12px;">Pregunta ${quizIndex + 1} de ${quizQuestions.length}</p>`;
+  html += `<p style="margin-bottom:16px;">${q.q}</p>`;
+  q.opts.forEach((opt, i) => {
+    html += `<button class="quiz-option" onclick="checkQuiz(${i}, this)">${String.fromCharCode(65+i)}. ${opt}</button>`;
+  });
+  html += `<div id="quiz-feedback" style="margin-top:12px;"></div>`;
+  html += `<div style="margin-top:16px; text-align:center;">
+    <button class="btn" id="quiz-next" style="display:none;" onclick="nextQuiz()">Siguiente →</button>
+  </div>`;
+  container.innerHTML = html;
+}
+
+function checkQuiz(selected, btn) {
+  if (quizAnswered) return;
+  quizAnswered = true;
+  const q = quizQuestions[quizIndex];
+  const fb = document.getElementById('quiz-feedback');
+  const options = btn.parentElement.querySelectorAll('.quiz-option');
+  options.forEach((o, i) => { if (i === q.correct) o.classList.add('correct'); });
+  if (selected === q.correct) {
+    quizScore++;
+    fb.innerHTML = `<div class="feedback ok">✅ ${q.fb}</div>`;
+  } else {
+    btn.classList.add('incorrect');
+    fb.innerHTML = `<div class="feedback err">❌ ${q.fb}</div>`;
+  }
+  options.forEach(o => o.disabled = true);
+  document.getElementById('quiz-next').style.display = 'inline-block';
+  if (quizIndex === quizQuestions.length - 1) {
+    document.getElementById('quiz-next').textContent = 'Ver Resultado →';
+  }
+}
+
+function nextQuiz() {
+  quizIndex++;
+  if (quizIndex >= quizQuestions.length) { mostrarResultado(); } else { renderQuiz(); }
+}
+
+function mostrarResultado() {
+  document.querySelectorAll('.card').forEach(c => c.classList.add('hidden'));
+  document.getElementById('screen-resultado').classList.remove('hidden');
+  document.getElementById('final-score').textContent = quizScore + '/' + quizQuestions.length;
+  const pct = (quizScore / quizQuestions.length) * 100;
+  let msg = '';
+  if (pct === 100) msg = '🏆 ¡Perfecto! Dominás las compuertas lógicas.';
+  else if (pct >= 75) msg = '👏 ¡Muy bien! Tenés una base sólida. Repasá los errores.';
+  else if (pct >= 50) msg = '💪 Vas por buen camino. Te recomendamos repasar las tablas de verdad.';
+  else msg = '📚 Necesitás repasar el material. Volvé a los módulos y practicá con el laboratorio.';
+  document.getElementById('final-message').textContent = msg;
+  updateProgress('resultado');
+}
+
+function reiniciar() {
+  quizIndex = 0; quizScore = 0; quizAnswered = false;
+  currentLab = 0; labAnswered = false;
+  goTo('inicio');
+}
+
+document.addEventListener('DOMContentLoaded', () => { updateProgress('inicio'); });
+</script>
+</body>
+</html>
