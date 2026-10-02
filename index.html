@@ -108,11 +108,29 @@
   }
   .gate-card.active { border-color: var(--accent); box-shadow: 0 0 20px rgba(34,211,238,0.2); }
   .gate-symbol {
-    font-size: 2rem;
-    font-weight: 900;
-    color: var(--accent);
+    height: 70px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     margin: 10px 0;
-    font-family: 'Courier New', monospace;
+  }
+  .gate-symbol svg {
+    height: 60px;
+    width: auto;
+  }
+  .gate-symbol svg path,
+  .gate-symbol svg line,
+  .gate-symbol svg circle,
+  .gate-symbol svg polygon {
+    stroke: var(--accent);
+    fill: none;
+    stroke-width: 3;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+  }
+  .gate-symbol svg circle.neg {
+    fill: var(--accent);
+    stroke: var(--accent);
   }
   .overline {
     text-decoration: overline;
@@ -207,7 +225,8 @@
   }
   @media (max-width: 600px) {
     .header h1 { font-size: 1.3rem; }
-    .gate-symbol { font-size: 1.5rem; }
+    .gate-symbol { height: 60px; }
+    .gate-symbol svg { height: 50px; }
     .output-display { font-size: 1.5rem; }
   }
 </style>
@@ -302,18 +321,83 @@
 </div>
 
 <script>
+// ============ SÍMBOLOS SVG DE COMPUERTAS ============
+// Todos los SVG usan viewBox 0 0 100 60 y trazo con "currentColor" via CSS.
+// El círculo pequeño (negación) se marca con la clase "neg".
+
+const SVG_AND = `
+<svg viewBox="0 0 100 60" xmlns="http://www.w3.org/2000/svg">
+  <path d="M 10 10 L 45 10 A 25 25 0 0 1 45 60 L 10 60 Z"/>
+  <line x1="0" y1="22" x2="10" y2="22"/>
+  <line x1="0" y1="48" x2="10" y2="48"/>
+  <line x1="70" y1="35" x2="100" y2="35"/>
+</svg>`;
+
+const SVG_OR = `
+<svg viewBox="0 0 100 60" xmlns="http://www.w3.org/2000/svg">
+  <path d="M 5 10 Q 30 35 5 60 Q 40 55 60 35 Q 40 15 5 10 Z"/>
+  <line x1="0" y1="22" x2="12" y2="22"/>
+  <line x1="0" y1="48" x2="12" y2="48"/>
+  <line x1="60" y1="35" x2="100" y2="35"/>
+</svg>`;
+
+const SVG_NOT = `
+<svg viewBox="0 0 100 60" xmlns="http://www.w3.org/2000/svg">
+  <polygon points="15,10 15,50 50,30"/>
+  <circle class="neg" cx="57" cy="30" r="5"/>
+  <line x1="0" y1="30" x2="15" y2="30"/>
+  <line x1="62" y1="30" x2="100" y2="30"/>
+</svg>`;
+
+const SVG_NAND = `
+<svg viewBox="0 0 100 60" xmlns="http://www.w3.org/2000/svg">
+  <path d="M 10 10 L 45 10 A 25 25 0 0 1 45 60 L 10 60 Z"/>
+  <circle class="neg" cx="73" cy="35" r="5"/>
+  <line x1="0" y1="22" x2="10" y2="22"/>
+  <line x1="0" y1="48" x2="10" y2="48"/>
+  <line x1="78" y1="35" x2="100" y2="35"/>
+</svg>`;
+
+const SVG_NOR = `
+<svg viewBox="0 0 100 60" xmlns="http://www.w3.org/2000/svg">
+  <path d="M 5 10 Q 30 35 5 60 Q 40 55 60 35 Q 40 15 5 10 Z"/>
+  <circle class="neg" cx="66" cy="35" r="5"/>
+  <line x1="0" y1="22" x2="12" y2="22"/>
+  <line x1="0" y1="48" x2="12" y2="48"/>
+  <line x1="71" y1="35" x2="100" y2="35"/>
+</svg>`;
+
+const SVG_XOR = `
+<svg viewBox="0 0 100 60" xmlns="http://www.w3.org/2000/svg">
+  <path d="M 12 10 Q 37 35 12 60 Q 47 55 67 35 Q 47 15 12 10 Z"/>
+  <path d="M 4 10 Q 29 35 4 60" fill="none"/>
+  <line x1="0" y1="22" x2="10" y2="22"/>
+  <line x1="0" y1="48" x2="10" y2="48"/>
+  <line x1="67" y1="35" x2="100" y2="35"/>
+</svg>`;
+
+const SVG_XNOR = `
+<svg viewBox="0 0 100 60" xmlns="http://www.w3.org/2000/svg">
+  <path d="M 12 10 Q 37 35 12 60 Q 47 55 67 35 Q 47 15 12 10 Z"/>
+  <path d="M 4 10 Q 29 35 4 60" fill="none"/>
+  <circle class="neg" cx="73" cy="35" r="5"/>
+  <line x1="0" y1="22" x2="10" y2="22"/>
+  <line x1="0" y1="48" x2="10" y2="48"/>
+  <line x1="78" y1="35" x2="100" y2="35"/>
+</svg>`;
+
 // ============ DATOS ============
 const basicGates = [
-  { name: 'AND', symbol: 'A · B', expr: 'A AND B', fn: (a,b) => (a === 1 && b === 1) ? 1 : 0, color: '#22d3ee' },
-  { name: 'OR',  symbol: 'A + B', expr: 'A OR B',  fn: (a,b) => (a === 1 || b === 1) ? 1 : 0, color: '#a78bfa' },
-  { name: 'NOT', symbol: '<span class="overline">A</span>', expr: 'NOT A (inversor)', fn: (a) => a === 1 ? 0 : 1, color: '#fbbf24' }
+  { name: 'AND', symbol: SVG_AND, expr: 'A AND B', fn: (a,b) => (a === 1 && b === 1) ? 1 : 0, color: '#22d3ee' },
+  { name: 'OR',  symbol: SVG_OR,  expr: 'A OR B',  fn: (a,b) => (a === 1 || b === 1) ? 1 : 0, color: '#a78bfa' },
+  { name: 'NOT', symbol: SVG_NOT, expr: 'NOT A (inversor)', fn: (a) => a === 1 ? 0 : 1, color: '#fbbf24' }
 ];
 
 const derivedGates = [
-  { name: 'NAND', symbol: '<span class="overline">(A · B)</span>', expr: 'NOT (A AND B)', fn: (a,b) => !(a === 1 && b === 1) ? 1 : 0, color: '#34d399' },
-  { name: 'NOR',  symbol: '<span class="overline">(A + B)</span>', expr: 'NOT (A OR B)',  fn: (a,b) => !(a === 1 || b === 1) ? 1 : 0, color: '#f87171' },
-  { name: 'XOR',  symbol: 'A ⊕ B', expr: 'A OR B, pero no ambas', fn: (a,b) => (a !== b) ? 1 : 0, color: '#f472b6' },
-  { name: 'XNOR', symbol: '<span class="overline">(A ⊕ B)</span>', expr: 'NOT (A XOR B)', fn: (a,b) => (a === b) ? 1 : 0, color: '#38bdf8' }
+  { name: 'NAND', symbol: SVG_NAND, expr: 'NOT (A AND B)', fn: (a,b) => !(a === 1 && b === 1) ? 1 : 0, color: '#34d399' },
+  { name: 'NOR',  symbol: SVG_NOR,  expr: 'NOT (A OR B)',  fn: (a,b) => !(a === 1 || b === 1) ? 1 : 0, color: '#f87171' },
+  { name: 'XOR',  symbol: SVG_XOR,  expr: 'A OR B, pero no ambas', fn: (a,b) => (a !== b) ? 1 : 0, color: '#f472b6' },
+  { name: 'XNOR', symbol: SVG_XNOR, expr: 'NOT (A XOR B)', fn: (a,b) => (a === b) ? 1 : 0, color: '#38bdf8' }
 ];
 
 const labExercises = [
@@ -353,7 +437,7 @@ const quizQuestions = [
 ];
 
 // ============ ESTADO ============
-const gateState = {};  // { 'basic-0': {a:0, b:0}, 'derived-2': {a:1, b:0}, ... }
+const gateState = {};
 let currentLab = 0;
 let labAnswered = false;
 let quizIndex = 0;
@@ -383,7 +467,7 @@ function renderBasicGates() {
   const container = document.getElementById('basic-gates');
   container.innerHTML = '';
   basicGates.forEach((g, i) => {
-    delete gateState['basic-' + i];  // resetea estado
+    delete gateState['basic-' + i];
     container.innerHTML += createGateCard(g, i, 'basic');
   });
 }
@@ -392,7 +476,7 @@ function renderDerivedGates() {
   const container = document.getElementById('derived-gates');
   container.innerHTML = '';
   derivedGates.forEach((g, i) => {
-    delete gateState['derived-' + i];  // resetea estado
+    delete gateState['derived-' + i];
     container.innerHTML += createGateCard(g, i, 'derived');
   });
 }
@@ -426,32 +510,25 @@ function createGateCard(g, idx, prefix) {
 
 function toggleInput(prefix, idx, input) {
   const key = `${prefix}-${idx}`;
-  
-  // Inicializar estado si no existe
   if (!gateState[key]) gateState[key] = { a: 0, b: 0 };
-  
-  // Cambiar el valor (toggle)
   gateState[key][input] = gateState[key][input] === 1 ? 0 : 1;
-  
-  // Actualizar el botón
+
   const btn = document.getElementById(`btn-${prefix}-${idx}-${input}`);
   const newVal = gateState[key][input];
   btn.textContent = input.toUpperCase() + ': ' + newVal;
   btn.classList.toggle('on', newVal === 1);
-  
-  // Calcular la salida
+
   const gate = prefix === 'basic' ? basicGates[idx] : derivedGates[idx];
   const a = gateState[key].a;
   const b = gateState[key].b;
-  
+
   let out;
   if (gate.name === 'NOT') {
     out = gate.fn(a);
   } else {
     out = gate.fn(a, b);
   }
-  
-  // Actualizar el display de salida
+
   const outEl = document.getElementById(`out-${prefix}-${idx}`);
   outEl.textContent = 'Salida: ' + out;
   outEl.className = 'output-display ' + (out === 1 ? 'output-1' : 'output-0');
