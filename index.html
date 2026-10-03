@@ -3,11 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Compuertas Lógicas — Laboratorio Interactivo</title>
+<title>Compuertas Lógicas — Laboratorio Prosumidor</title>
 <style>
   :root {
     --bg: #0f172a;
     --card: #1e293b;
+    --card-soft: #0b1220;
     --accent: #22d3ee;
     --accent2: #a78bfa;
     --green: #34d399;
@@ -15,6 +16,17 @@
     --yellow: #fbbf24;
     --text: #e2e8f0;
     --muted: #94a3b8;
+    --border: #334155;
+    --shadow: rgba(34,211,238,0.3);
+  }
+  body.light {
+    --bg: #f1f5f9;
+    --card: #ffffff;
+    --card-soft: #f8fafc;
+    --text: #0f172a;
+    --muted: #64748b;
+    --border: #cbd5e1;
+    --shadow: rgba(34,211,238,0.2);
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
@@ -25,15 +37,18 @@
     display: flex;
     justify-content: center;
     padding: 20px;
+    transition: background 0.3s, color 0.3s;
   }
-  .app { width: 100%; max-width: 900px; }
+  .app { width: 100%; max-width: 950px; }
+
   .header {
     text-align: center;
-    padding: 30px 20px;
-    background: linear-gradient(135deg, #1e293b, #0f172a);
+    padding: 28px 20px;
+    background: linear-gradient(135deg, var(--card), var(--card-soft));
     border-radius: 20px;
-    border: 1px solid #334155;
+    border: 1px solid var(--border);
     margin-bottom: 20px;
+    position: relative;
   }
   .header h1 {
     font-size: 1.8rem;
@@ -43,9 +58,33 @@
     background-clip: text;
   }
   .header p { color: var(--muted); margin-top: 8px; font-size: 0.95rem; }
+  .header .sub { font-size: 0.8rem; margin-top: 4px; }
+  .header-actions {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    display: flex;
+    gap: 8px;
+  }
+  .icon-btn {
+    background: var(--card-soft);
+    border: 1px solid var(--border);
+    color: var(--text);
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+  }
+  .icon-btn:hover { border-color: var(--accent); transform: translateY(-2px); }
+
   .progress-bar {
     height: 8px;
-    background: #334155;
+    background: var(--border);
     border-radius: 10px;
     margin-top: 16px;
     overflow: hidden;
@@ -56,12 +95,40 @@
     width: 0%;
     transition: width 0.5s ease;
   }
+
+  .tabs {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    margin-bottom: 20px;
+    scrollbar-width: thin;
+  }
+  .tab {
+    background: var(--card);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    padding: 10px 16px;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 600;
+    white-space: nowrap;
+    transition: all 0.2s;
+  }
+  .tab:hover { border-color: var(--accent); color: var(--text); }
+  .tab.active {
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    color: #0f172a;
+    border-color: transparent;
+  }
+
   .card {
     background: var(--card);
     border-radius: 16px;
     padding: 24px;
     margin-bottom: 20px;
-    border: 1px solid #334155;
+    border: 1px solid var(--border);
     animation: fadeIn 0.4s ease;
   }
   @keyframes fadeIn {
@@ -72,26 +139,34 @@
   h2 { color: var(--accent); margin-bottom: 12px; font-size: 1.3rem; }
   h3 { color: var(--accent2); margin: 16px 0 8px; font-size: 1.1rem; }
   p { line-height: 1.6; color: var(--text); margin-bottom: 10px; }
+
   .btn {
     background: linear-gradient(90deg, var(--accent), var(--accent2));
     color: #0f172a;
     border: none;
-    padding: 12px 28px;
+    padding: 12px 24px;
     border-radius: 10px;
-    font-size: 1rem;
+    font-size: 0.95rem;
     font-weight: 700;
     cursor: pointer;
     transition: transform 0.2s, box-shadow 0.2s;
-    margin: 6px 4px;
+    margin: 4px;
   }
-  .btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(34,211,238,0.3); }
+  .btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px var(--shadow); }
   .btn-secondary {
     background: transparent;
     border: 1px solid var(--accent);
     color: var(--accent);
   }
   .btn-secondary:hover { background: rgba(34,211,238,0.1); }
+  .btn-danger {
+    background: transparent;
+    border: 1px solid var(--red);
+    color: var(--red);
+  }
+  .btn-danger:hover { background: rgba(248,113,113,0.1); }
   .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
   .gate-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -99,14 +174,14 @@
     margin-top: 16px;
   }
   .gate-card {
-    background: #0f172a;
+    background: var(--card-soft);
     border-radius: 12px;
     padding: 18px;
-    border: 1px solid #334155;
+    border: 1px solid var(--border);
     text-align: center;
     transition: border-color 0.3s;
   }
-  .gate-card.active { border-color: var(--accent); box-shadow: 0 0 20px rgba(34,211,238,0.2); }
+  .gate-card.active { border-color: var(--accent); box-shadow: 0 0 20px var(--shadow); }
   .gate-symbol {
     height: 70px;
     display: flex;
@@ -114,10 +189,7 @@
     justify-content: center;
     margin: 10px 0;
   }
-  .gate-symbol svg {
-    height: 60px;
-    width: auto;
-  }
+  .gate-symbol svg { height: 60px; width: auto; }
   .gate-symbol svg path,
   .gate-symbol svg line,
   .gate-symbol svg circle,
@@ -132,24 +204,7 @@
     fill: var(--accent);
     stroke: var(--accent);
   }
-  .overline {
-    text-decoration: overline;
-    text-decoration-thickness: 2px;
-    padding: 0 2px;
-  }
-  .truth-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 10px;
-    font-size: 0.9rem;
-  }
-  .truth-table th, .truth-table td {
-    border: 1px solid #334155;
-    padding: 8px;
-    text-align: center;
-  }
-  .truth-table th { background: #1e293b; color: var(--accent); }
-  .truth-table td { background: #0f172a; }
+
   .toggle-row {
     display: flex;
     gap: 12px;
@@ -160,8 +215,8 @@
   .toggle-btn {
     padding: 10px 20px;
     border-radius: 10px;
-    border: 2px solid #334155;
-    background: #0f172a;
+    border: 2px solid var(--border);
+    background: var(--card-soft);
     color: var(--text);
     font-size: 1rem;
     font-weight: 700;
@@ -185,7 +240,54 @@
     transition: all 0.3s;
   }
   .output-1 { background: var(--green); color: #0f172a; }
-  .output-0 { background: #334155; color: var(--muted); }
+  .output-0 { background: var(--border); color: var(--muted); }
+
+  .truth-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+    font-size: 0.9rem;
+  }
+  .truth-table th, .truth-table td {
+    border: 1px solid var(--border);
+    padding: 8px;
+    text-align: center;
+  }
+  .truth-table th { background: var(--card); color: var(--accent); }
+  .truth-table td { background: var(--card-soft); }
+  .truth-table input {
+    width: 45px;
+    height: 35px;
+    text-align: center;
+    background: var(--card);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-weight: 700;
+    font-size: 1rem;
+  }
+  .truth-table input:focus { outline: 2px solid var(--accent); }
+  .truth-table input.correct { border-color: var(--green); background: rgba(52,211,153,0.15); }
+  .truth-table input.incorrect { border-color: var(--red); background: rgba(248,113,113,0.15); }
+
+  .expr-input, .form-input, .form-select, .form-textarea {
+    width: 100%;
+    padding: 12px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--card-soft);
+    color: var(--text);
+    font-size: 0.95rem;
+    font-family: inherit;
+    margin-bottom: 10px;
+  }
+  .expr-input { font-family: 'Courier New', monospace; font-size: 1.05rem; }
+  .form-input:focus, .form-select:focus, .form-textarea:focus, .expr-input:focus { outline: 2px solid var(--accent); }
+  .form-textarea { min-height: 90px; resize: vertical; }
+
+  .form-group { margin-bottom: 12px; }
+  .form-group label { display: block; font-size: 0.85rem; color: var(--muted); margin-bottom: 4px; font-weight: 600; }
+
   .quiz-option {
     display: block;
     width: 100%;
@@ -193,8 +295,8 @@
     padding: 12px 16px;
     margin: 8px 0;
     border-radius: 10px;
-    border: 2px solid #334155;
-    background: #0f172a;
+    border: 2px solid var(--border);
+    background: var(--card-soft);
     color: var(--text);
     cursor: pointer;
     font-size: 0.95rem;
@@ -203,6 +305,7 @@
   .quiz-option:hover { border-color: var(--accent); }
   .quiz-option.correct { background: rgba(52,211,153,0.2); border-color: var(--green); }
   .quiz-option.incorrect { background: rgba(248,113,113,0.2); border-color: var(--red); }
+
   .feedback {
     padding: 12px;
     border-radius: 10px;
@@ -211,8 +314,11 @@
   }
   .feedback.ok { background: rgba(52,211,153,0.15); border-left: 4px solid var(--green); }
   .feedback.err { background: rgba(248,113,113,0.15); border-left: 4px solid var(--red); }
+  .feedback.info { background: rgba(34,211,238,0.15); border-left: 4px solid var(--accent); }
+
   .score-box { text-align: center; padding: 30px; }
   .score-box .big { font-size: 3.5rem; font-weight: 900; color: var(--accent); }
+
   .tag {
     display: inline-block;
     padding: 4px 12px;
@@ -223,11 +329,192 @@
     color: var(--accent2);
     margin: 4px 4px 4px 0;
   }
+
+  /* TARJETA PROSUMIDORA */
+  .prod-card {
+    background: linear-gradient(135deg, var(--card), var(--card-soft));
+    border: 2px solid var(--accent);
+    border-radius: 16px;
+    padding: 24px;
+    margin-top: 16px;
+    position: relative;
+    overflow: hidden;
+  }
+  .prod-card .prod-title {
+    font-size: 1.4rem;
+    font-weight: 900;
+    color: var(--accent);
+    margin-bottom: 8px;
+  }
+  .prod-card .prod-body { line-height: 1.7; white-space: pre-wrap; }
+  .prod-card .prod-footer {
+    margin-top: 16px;
+    font-size: 0.85rem;
+    color: var(--muted);
+    border-top: 1px dashed var(--border);
+    padding-top: 10px;
+  }
+
+  /* CIRCUITO */
+  .circuit-canvas {
+    background: var(--card-soft);
+    border: 2px dashed var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    margin: 16px 0;
+    text-align: center;
+    min-height: 280px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+  }
+  .circuit-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .circuit-node {
+    background: var(--card);
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 18px;
+    font-weight: 700;
+    font-size: 0.95rem;
+    min-width: 90px;
+    text-align: center;
+    transition: all 0.3s;
+  }
+  .circuit-node.active {
+    border-color: var(--accent);
+    box-shadow: 0 0 15px var(--shadow);
+  }
+  .circuit-input-btn {
+    background: var(--card);
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 20px;
+    font-weight: 700;
+    font-size: 1rem;
+    cursor: pointer;
+    min-width: 90px;
+    color: var(--text);
+    transition: all 0.3s;
+  }
+  .circuit-input-btn.on {
+    background: var(--green);
+    border-color: var(--green);
+    color: #0f172a;
+  }
+  .circuit-arrow {
+    font-size: 1.5rem;
+    color: var(--muted);
+  }
+  .circuit-light {
+    font-size: 3.5rem;
+    padding: 16px 24px;
+    border-radius: 16px;
+    transition: all 0.4s;
+    background: var(--card);
+    border: 2px solid var(--border);
+  }
+  .circuit-light.on {
+    background: radial-gradient(circle, var(--yellow), rgba(251,191,36,0.3));
+    border-color: var(--yellow);
+    box-shadow: 0 0 40px var(--yellow);
+    transform: scale(1.1);
+  }
+  .circuit-light.off { opacity: 0.5; }
+
+  .circuit-gate-select {
+    background: var(--card);
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    padding: 10px 16px;
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: var(--text);
+    cursor: pointer;
+  }
+  .circuit-gate-select:focus { outline: 2px solid var(--accent); }
+
+  .circuit-code {
+    background: #0b1220;
+    color: #22d3ee;
+    font-family: 'Courier New', monospace;
+    padding: 16px;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    white-space: pre-wrap;
+    line-height: 1.6;
+    margin-top: 12px;
+    border: 1px solid var(--border);
+  }
+
+  /* CERTIFICADO */
+  .certificate {
+    background: #ffffff;
+    color: #0f172a;
+    border: 8px double #22d3ee;
+    border-radius: 12px;
+    padding: 40px;
+    text-align: center;
+    max-width: 700px;
+    margin: 16px auto;
+    font-family: Georgia, serif;
+  }
+  .certificate h2 { color: #0f172a; font-size: 2rem; margin-bottom: 12px; }
+  .certificate .cert-name {
+    font-size: 1.8rem;
+    font-weight: 900;
+    color: #0e7490;
+    margin: 16px 0;
+    border-bottom: 2px solid #22d3ee;
+    padding-bottom: 8px;
+  }
+  .certificate .cert-text { font-size: 1rem; line-height: 1.7; margin: 12px 0; }
+  .certificate .cert-date { margin-top: 24px; font-size: 0.9rem; color: #64748b; }
+  .certificate .cert-seal { font-size: 3rem; margin-top: 12px; }
+
+  .toast {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: var(--card);
+    border: 1px solid var(--accent);
+    color: var(--text);
+    padding: 12px 20px;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    box-shadow: 0 6px 30px rgba(0,0,0,0.3);
+    transition: transform 0.3s;
+    z-index: 1000;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  @media print {
+    body * { visibility: hidden; }
+    .certificate, .certificate * { visibility: visible; }
+    .certificate { position: absolute; top: 0; left: 0; width: 100%; }
+    .certificate h2 { color: #0f172a !important; -webkit-text-fill-color: #0f172a !important; }
+  }
+
   @media (max-width: 600px) {
     .header h1 { font-size: 1.3rem; }
+    .header-actions { top: 8px; right: 8px; }
+    .icon-btn { width: 32px; height: 32px; font-size: 0.9rem; }
     .gate-symbol { height: 60px; }
     .gate-symbol svg { height: 50px; }
     .output-display { font-size: 1.5rem; }
+    .circuit-light { font-size: 2.5rem; }
+    .certificate { padding: 20px; }
+    .certificate h2 { font-size: 1.4rem; }
+    .certificate .cert-name { font-size: 1.3rem; }
   }
 </style>
 </head>
@@ -235,49 +522,116 @@
 
 <div class="app">
   <div class="header">
+    <div class="header-actions">
+      <button class="icon-btn" id="btn-theme" onclick="toggleTheme()" title="Cambiar tema">🌙</button>
+      <button class="icon-btn" onclick="speakIntro()" title="Leer en voz alta">🔊</button>
+    </div>
     <h1>⚡ Compuertas Lógicas</h1>
-    <p>Laboratorio Interactivo — Arquitectura de Computadoras</p>
-    <p style="font-size:0.8rem; margin-top:4px;">IES N° 5 "José Eugenio Tello" — San Salvador de Jujuy</p>
+    <p>Laboratorio Interactivo Prosumidor</p>
+    <p class="sub">IES N° 5 "José Eugenio Tello" — San Salvador de Jujuy</p>
     <div class="progress-bar"><div class="progress-fill" id="progress"></div></div>
   </div>
 
+  <div class="tabs" id="tabs">
+    <button class="tab active" onclick="goTo('inicio')">🏠 Inicio</button>
+    <button class="tab" onclick="goTo('basicas')">🔌 Básicas</button>
+    <button class="tab" onclick="goTo('derivadas')">🧩 Derivadas</button>
+    <button class="tab" onclick="goTo('constructor')">✏️ Constructor</button>
+    <button class="tab" onclick="goTo('editor')">📝 Editor</button>
+    <button class="tab" onclick="goTo('laboratorio')">🔬 Lab</button>
+    <button class="tab" onclick="goTo('circuito')">⚡ Circuito</button>
+    <button class="tab" onclick="goTo('quiz')">📋 Quiz</button>
+    <button class="tab" onclick="goTo('produccion')">🎨 Producción</button>
+    <button class="tab" onclick="goTo('certificado')">🏆 Certificado</button>
+  </div>
+
+  <!-- INICIO -->
   <div class="card" id="screen-inicio">
     <h2>🎯 Objetivo del recurso</h2>
-    <p>Identificar, diferenciar y aplicar las compuertas lógicas <strong>AND, OR, NOT, NAND, NOR, XOR y XNOR</strong> mediante la resolución de ejercicios interactivos, desarrollando las capacidades de <strong>abstracción</strong> y <strong>razonamiento inferencial</strong> requeridas en tu perfil profesional como Técnico Superior en Soporte de Infraestructura de TI.</p>
+    <p>Identificar, diferenciar y aplicar las compuertas lógicas <strong>AND, OR, NOT, NAND, NOR, XOR y XNOR</strong> mediante la resolución y <strong>producción</strong> de contenido interactivo, incluyendo el <strong>diseño de un circuito eléctrico básico</strong> que encienda una luz.</p>
     <div style="margin-top:12px;">
-      <span class="tag">AND</span>
-      <span class="tag">OR</span>
-      <span class="tag">NOT</span>
-      <span class="tag">NAND</span>
-      <span class="tag">NOR</span>
-      <span class="tag">XOR</span>
-      <span class="tag">XNOR</span>
+      <span class="tag">AND</span><span class="tag">OR</span><span class="tag">NOT</span>
+      <span class="tag">NAND</span><span class="tag">NOR</span><span class="tag">XOR</span><span class="tag">XNOR</span>
     </div>
+    <h3>📚 ¿Qué podés hacer acá?</h3>
+    <ul style="margin-left:20px; line-height:1.8;">
+      <li>🔌 <strong>Básicas:</strong> explorá AND, OR y NOT con sus íconos y tablas.</li>
+      <li>🧩 <strong>Derivadas:</strong> explorá NAND, NOR, XOR y XNOR.</li>
+      <li>✏️ <strong>Constructor:</strong> llená tablas de verdad y verificá.</li>
+      <li>📝 <strong>Editor:</strong> escribí expresiones booleanas y velas resueltas.</li>
+      <li>🔬 <strong>Lab:</strong> identificá la compuerta a partir de la tabla.</li>
+      <li>⚡ <strong>Circuito:</strong> diseñá tu propio circuito que encienda una luz.</li>
+      <li>📋 <strong>Quiz:</strong> evaluá lo que aprendiste.</li>
+      <li>🎨 <strong>Producción:</strong> creá tu tarjeta de compuerta favorita.</li>
+      <li>🏆 <strong>Certificado:</strong> generá tu certificado de logros.</li>
+    </ul>
     <div style="text-align:center; margin-top:24px;">
       <button class="btn" onclick="goTo('basicas')">Comenzar →</button>
     </div>
   </div>
 
+  <!-- BÁSICAS -->
   <div class="card hidden" id="screen-basicas">
     <h2>🔌 Compuertas Básicas: AND, OR, NOT</h2>
-    <p>Hacé clic en las entradas A y B para ver cómo cambia la salida en cada compuerta.</p>
+    <p>Hacé clic en las entradas A y B para ver cómo cambia la salida.</p>
     <div class="gate-grid" id="basic-gates"></div>
     <div style="text-align:center; margin-top:20px;">
-      <button class="btn btn-secondary" onclick="goTo('inicio')">← Volver</button>
-      <button class="btn" onclick="goTo('derivadas')">Siguiente: Derivadas →</button>
+      <button class="btn btn-secondary" onclick="goTo('inicio')">← Inicio</button>
+      <button class="btn" onclick="goTo('derivadas')">Siguiente →</button>
     </div>
   </div>
 
+  <!-- DERIVADAS -->
   <div class="card hidden" id="screen-derivadas">
     <h2>🧩 Compuertas Derivadas: NAND, NOR, XOR, XNOR</h2>
-    <p>Estas compuertas combinan las básicas y son la base de circuitos más complejos.</p>
+    <p>Estas compuertas combinan las básicas y son la base de circuitos complejos.</p>
     <div class="gate-grid" id="derived-gates"></div>
     <div style="text-align:center; margin-top:20px;">
       <button class="btn btn-secondary" onclick="goTo('basicas')">← Volver</button>
-      <button class="btn" onclick="goTo('laboratorio')">Siguiente: Laboratorio →</button>
+      <button class="btn" onclick="goTo('constructor')">Siguiente: Constructor →</button>
     </div>
   </div>
 
+  <!-- CONSTRUCTOR -->
+  <div class="card hidden" id="screen-constructor">
+    <h2>✏️ Constructor de Tablas de Verdad</h2>
+    <p>Llená la columna "Salida" con 0 o 1 según corresponda. Luego presioná <strong>Verificar</strong>.</p>
+    <div style="text-align:center; margin: 12px 0;">
+      <label style="font-weight:700; margin-right:10px;">Elegí una compuerta:</label>
+      <select class="form-select" id="constructor-gate" style="width:auto; display:inline-block;" onchange="renderConstructor()">
+        <option value="AND">AND</option>
+        <option value="OR">OR</option>
+        <option value="NOT">NOT</option>
+        <option value="NAND">NAND</option>
+        <option value="NOR">NOR</option>
+        <option value="XOR">XOR</option>
+        <option value="XNOR">XNOR</option>
+      </select>
+    </div>
+    <div style="text-align:center; margin: 16px 0;">
+      <div class="gate-symbol" id="constructor-symbol"></div>
+    </div>
+    <table class="truth-table" id="constructor-table" style="max-width:400px; margin: 0 auto;"></table>
+    <div id="constructor-feedback" style="margin-top:16px;"></div>
+    <div style="text-align:center; margin-top:20px;">
+      <button class="btn btn-secondary" onclick="goTo('derivadas')">← Volver</button>
+      <button class="btn" onclick="checkConstructor()">✅ Verificar</button>
+      <button class="btn btn-secondary" onclick="clearConstructor()">🧹 Limpiar</button>
+    </div>
+  </div>
+
+  <!-- EDITOR -->
+  <div class="card hidden" id="screen-editor">
+    <h2>📝 Editor de Expresiones Booleanas</h2>
+    <p>Escribí una expresión usando <code>AND</code>, <code>OR</code>, <code>NOT</code>, <code>XOR</code> y variables <code>A</code>, <code>B</code>, <code>C</code>. El sistema calcula la tabla de verdad.</p>
+    <input type="text" class="expr-input" id="expr-input" placeholder="Ej: (A AND B) OR NOT C" value="A AND B" oninput="renderEditor()">
+    <div id="editor-result"></div>
+    <div style="text-align:center; margin-top:20px;">
+      <button class="btn btn-secondary" onclick="goTo('constructor')">← Volver</button>
+    </div>
+  </div>
+
+  <!-- LABORATORIO -->
   <div class="card hidden" id="screen-laboratorio">
     <h2>🔬 Laboratorio: Identificá la Compuerta</h2>
     <p>Se te muestra una tabla de verdad. Elegí qué compuerta lógica la produce.</p>
@@ -291,100 +645,187 @@
       <div id="lab-feedback" style="margin-top:16px;"></div>
     </div>
     <div style="text-align:center; margin-top:20px;">
-      <button class="btn btn-secondary" onclick="goTo('derivadas')">← Volver</button>
-      <button class="btn" id="lab-next" style="display:none;" onclick="nextLab()">Siguiente ejercicio →</button>
-      <button class="btn hidden" id="lab-to-quiz" onclick="goTo('quiz')">Ir a la Evaluación →</button>
+      <button class="btn btn-secondary" onclick="goTo('editor')">← Volver</button>
+      <button class="btn" id="lab-next" style="display:none;" onclick="nextLab()">Siguiente →</button>
+      <button class="btn hidden" id="lab-to-quiz" onclick="goTo('circuito')">Ir al Circuito →</button>
     </div>
   </div>
 
+  <!-- CONSTRUCTOR DE CIRCUITOS -->
+  <div class="card hidden" id="screen-circuito">
+    <h2>⚡ Constructor de Circuitos</h2>
+    <p>Diseñá un circuito que <strong>encienda una luz (💡)</strong> combinando entradas (A, B) y compuertas lógicas. Probá todas las combinaciones y después <strong>exportá tu circuito</strong> para que tu docente lo verifique.</p>
+
+    <div class="form-group">
+      <label>Tu nombre</label>
+      <input class="form-input" id="circ-name" placeholder="Ej: Juan Pérez" maxlength="40">
+    </div>
+
+    <div class="form-group">
+      <label>Nombre de tu circuito</label>
+      <input class="form-input" id="circ-title" placeholder="Ej: Luz que se enciende cuando A y B están activos" maxlength="80">
+    </div>
+
+    <div class="circuit-canvas" id="circuit-canvas">
+      <div class="circuit-row">
+        <button class="circuit-input-btn" id="circ-a" onclick="toggleCircInput('a')">A: 0</button>
+        <span class="circuit-arrow">→</span>
+        <select class="circuit-gate-select" id="circ-gate" onchange="updateCircuit()">
+          <option value="AND">AND</option>
+          <option value="OR">OR</option>
+          <option value="NOT">NOT</option>
+          <option value="NAND">NAND</option>
+          <option value="NOR">NOR</option>
+          <option value="XOR">XOR</option>
+          <option value="XNOR">XNOR</option>
+        </select>
+        <span class="circuit-arrow">←</span>
+        <button class="circuit-input-btn" id="circ-b" onclick="toggleCircInput('b')">B: 0</button>
+      </div>
+      <div class="circuit-row">
+        <span class="circuit-arrow" style="font-size:2rem;">↓</span>
+      </div>
+      <div class="circuit-row">
+        <div class="circuit-light off" id="circ-light">💡</div>
+      </div>
+      <div class="circuit-row" style="margin-top:12px;">
+        <div class="circuit-node" id="circ-status">Luz: APAGADA</div>
+      </div>
+    </div>
+
+    <div style="text-align:center; margin-top:16px;">
+      <button class="btn" onclick="testCircuit()">🧪 Probar todas las combinaciones</button>
+      <button class="btn btn-secondary" onclick="exportCircuit()">📤 Exportar mi circuito</button>
+      <button class="btn btn-secondary" onclick="shareCircuit()">📱 Compartir al docente</button>
+      <button class="btn btn-danger" onclick="resetCircuit()">🔄 Reiniciar</button>
+    </div>
+
+    <div id="circuit-result"></div>
+  </div>
+
+  <!-- QUIZ -->
   <div class="card hidden" id="screen-quiz">
-    <h2>📝 Evaluación Final</h2>
-    <p>Respondé las siguientes preguntas. Tenés retroalimentación inmediata.</p>
+    <h2>📋 Evaluación Final</h2>
+    <p>Respondé las preguntas. Tenés retroalimentación inmediata.</p>
     <div id="quiz-container"></div>
     <div style="text-align:center; margin-top:20px;">
-      <button class="btn btn-secondary" onclick="goTo('laboratorio')">← Volver</button>
+      <button class="btn btn-secondary" onclick="goTo('circuito')">← Volver</button>
       <button class="btn" id="btn-resultado" style="display:none;" onclick="mostrarResultado()">Ver Resultado →</button>
     </div>
   </div>
 
+  <!-- RESULTADO -->
   <div class="card hidden" id="screen-resultado">
     <div class="score-box">
       <h2>🏁 Resultado Final</h2>
-      <div class="big" id="final-score">0/8</div>
+      <div class="big" id="final-score">0/3</div>
       <p id="final-message" style="font-size:1.1rem; margin-top:12px;"></p>
       <div style="margin-top:20px;">
-        <button class="btn" onclick="reiniciar()">🔄 Volver a intentar</button>
+        <button class="btn" onclick="reiniciar()">🔄 Reintentar</button>
+        <button class="btn" onclick="goTo('produccion')">🎨 Crear mi producción →</button>
         <button class="btn btn-secondary" onclick="goTo('inicio')">🏠 Inicio</button>
       </div>
     </div>
   </div>
+
+  <!-- PRODUCCIÓN -->
+  <div class="card hidden" id="screen-produccion">
+    <h2>🎨 Mi Compuerta Favorita</h2>
+    <p>Elegí una compuerta, explicá con tus palabras qué hace y para qué sirve. Después podés <strong>descargarla</strong> o <strong>compartirla</strong>.</p>
+    <div class="form-group">
+      <label>Tu nombre</label>
+      <input class="form-input" id="prod-name" placeholder="Ej: Juan Pérez" maxlength="40">
+    </div>
+    <div class="form-group">
+      <label>Elegí tu compuerta favorita</label>
+      <select class="form-select" id="prod-gate" onchange="updateProdGate()">
+        <option value="AND">AND</option>
+        <option value="OR">OR</option>
+        <option value="NOT">NOT</option>
+        <option value="NAND">NAND</option>
+        <option value="NOR">NOR</option>
+        <option value="XOR">XOR</option>
+        <option value="XNOR">XNOR</option>
+      </select>
+    </div>
+    <div style="text-align:center; margin: 12px 0;">
+      <div class="gate-symbol" id="prod-symbol"></div>
+    </div>
+    <div class="form-group">
+      <label>¿Qué hace esta compuerta? (con tus palabras)</label>
+      <textarea class="form-textarea" id="prod-what" placeholder="Ej: La compuerta AND da salida 1 solo cuando TODAS las entradas son 1..."></textarea>
+    </div>
+    <div class="form-group">
+      <label>¿Para qué sirve? (aplicación real)</label>
+      <textarea class="form-textarea" id="prod-use" placeholder="Ej: Se usa en sistemas de seguridad..."></textarea>
+    </div>
+    <div style="text-align:center; margin-top:16px;">
+      <button class="btn" onclick="generateProdCard()">🎨 Generar mi tarjeta</button>
+      <button class="btn btn-secondary" onclick="downloadProdCard()">📥 Descargar</button>
+      <button class="btn btn-secondary" onclick="shareProdCard()">📤 Compartir</button>
+    </div>
+    <div id="prod-result"></div>
+  </div>
+
+  <!-- CERTIFICADO -->
+  <div class="card hidden" id="screen-certificado">
+    <h2>🏆 Certificado de Logros</h2>
+    <p>Completá tu nombre y generá tu certificado. Después podés imprimirlo o guardarlo como PDF.</p>
+    <div class="form-group" style="max-width:400px; margin: 0 auto 16px;">
+      <label>Tu nombre completo</label>
+      <input class="form-input" id="cert-name" placeholder="Ej: Juan Pérez" maxlength="60">
+    </div>
+    <div class="form-group" style="max-width:400px; margin: 0 auto 16px;">
+      <label>Fecha</label>
+      <input class="form-input" type="date" id="cert-date">
+    </div>
+    <div style="text-align:center; margin-top:16px;">
+      <button class="btn" onclick="generateCertificate()">🏆 Generar certificado</button>
+      <button class="btn btn-secondary" onclick="printCertificate()">🖨️ Imprimir / Guardar PDF</button>
+    </div>
+    <div id="cert-result"></div>
+  </div>
 </div>
 
+<div class="toast" id="toast"></div>
+
 <script>
-// ============ SÍMBOLOS SVG DE COMPUERTAS ============
-// Todos los SVG usan viewBox 0 0 100 60 y trazo con "currentColor" via CSS.
-// El círculo pequeño (negación) se marca con la clase "neg".
-
-const SVG_AND = `
-<svg viewBox="0 0 100 60" xmlns="http://www.w3.org/2000/svg">
+// ============================================================
+// SÍMBOLOS SVG DE COMPUERTAS (AND, OR, NOT, NAND, NOR, XOR, XNOR)
+// ============================================================
+const SVG_AND = `<svg viewBox="0 0 100 60" xmlns="http://www.w3.org/2000/svg">
   <path d="M 10 10 L 45 10 A 25 25 0 0 1 45 60 L 10 60 Z"/>
-  <line x1="0" y1="22" x2="10" y2="22"/>
-  <line x1="0" y1="48" x2="10" y2="48"/>
-  <line x1="70" y1="35" x2="100" y2="35"/>
-</svg>`;
-
-const SVG_OR = `
-<svg viewBox="0 0 100 60" xmlns="http://www.w3.org/2000/svg">
+  <line x1="0" y1="22" x2="10" y2="22"/><line x1="0" y1="48" x2="10" y2="48"/>
+  <line x1="70" y1="35" x2="100" y2="35"/></svg>`;
+const SVG_OR = `<svg viewBox="0 0 100 60" xmlns="http://www.w3.org/2000/svg">
   <path d="M 5 10 Q 30 35 5 60 Q 40 55 60 35 Q 40 15 5 10 Z"/>
-  <line x1="0" y1="22" x2="12" y2="22"/>
-  <line x1="0" y1="48" x2="12" y2="48"/>
-  <line x1="60" y1="35" x2="100" y2="35"/>
-</svg>`;
-
-const SVG_NOT = `
-<svg viewBox="0 0 100 60" xmlns="http://www.w3.org/2000/svg">
+  <line x1="0" y1="22" x2="12" y2="22"/><line x1="0" y1="48" x2="12" y2="48"/>
+  <line x1="60" y1="35" x2="100" y2="35"/></svg>`;
+const SVG_NOT = `<svg viewBox="0 0 100 60" xmlns="http://www.w3.org/2000/svg">
   <polygon points="15,10 15,50 50,30"/>
   <circle class="neg" cx="57" cy="30" r="5"/>
-  <line x1="0" y1="30" x2="15" y2="30"/>
-  <line x1="62" y1="30" x2="100" y2="30"/>
-</svg>`;
-
-const SVG_NAND = `
-<svg viewBox="0 0 100 60" xmlns="http://www.w3.org/2000/svg">
+  <line x1="0" y1="30" x2="15" y2="30"/><line x1="62" y1="30" x2="100" y2="30"/></svg>`;
+const SVG_NAND = `<svg viewBox="0 0 100 60" xmlns="http://www.w3.org/2000/svg">
   <path d="M 10 10 L 45 10 A 25 25 0 0 1 45 60 L 10 60 Z"/>
   <circle class="neg" cx="73" cy="35" r="5"/>
-  <line x1="0" y1="22" x2="10" y2="22"/>
-  <line x1="0" y1="48" x2="10" y2="48"/>
-  <line x1="78" y1="35" x2="100" y2="35"/>
-</svg>`;
-
-const SVG_NOR = `
-<svg viewBox="0 0 100 60" xmlns="http://www.w3.org/2000/svg">
+  <line x1="0" y1="22" x2="10" y2="22"/><line x1="0" y1="48" x2="10" y2="48"/>
+  <line x1="78" y1="35" x2="100" y2="35"/></svg>`;
+const SVG_NOR = `<svg viewBox="0 0 100 60" xmlns="http://www.w3.org/2000/svg">
   <path d="M 5 10 Q 30 35 5 60 Q 40 55 60 35 Q 40 15 5 10 Z"/>
   <circle class="neg" cx="66" cy="35" r="5"/>
-  <line x1="0" y1="22" x2="12" y2="22"/>
-  <line x1="0" y1="48" x2="12" y2="48"/>
-  <line x1="71" y1="35" x2="100" y2="35"/>
-</svg>`;
-
-const SVG_XOR = `
-<svg viewBox="0 0 100 60" xmlns="http://www.w3.org/2000/svg">
+  <line x1="0" y1="22" x2="12" y2="22"/><line x1="0" y1="48" x2="12" y2="48"/>
+  <line x1="71" y1="35" x2="100" y2="35"/></svg>`;
+const SVG_XOR = `<svg viewBox="0 0 100 60" xmlns="http://www.w3.org/2000/svg">
   <path d="M 12 10 Q 37 35 12 60 Q 47 55 67 35 Q 47 15 12 10 Z"/>
   <path d="M 4 10 Q 29 35 4 60" fill="none"/>
-  <line x1="0" y1="22" x2="10" y2="22"/>
-  <line x1="0" y1="48" x2="10" y2="48"/>
-  <line x1="67" y1="35" x2="100" y2="35"/>
-</svg>`;
-
-const SVG_XNOR = `
-<svg viewBox="0 0 100 60" xmlns="http://www.w3.org/2000/svg">
+  <line x1="0" y1="22" x2="10" y2="22"/><line x1="0" y1="48" x2="10" y2="48"/>
+  <line x1="67" y1="35" x2="100" y2="35"/></svg>`;
+const SVG_XNOR = `<svg viewBox="0 0 100 60" xmlns="http://www.w3.org/2000/svg">
   <path d="M 12 10 Q 37 35 12 60 Q 47 55 67 35 Q 47 15 12 10 Z"/>
   <path d="M 4 10 Q 29 35 4 60" fill="none"/>
   <circle class="neg" cx="73" cy="35" r="5"/>
-  <line x1="0" y1="22" x2="10" y2="22"/>
-  <line x1="0" y1="48" x2="10" y2="48"/>
-  <line x1="78" y1="35" x2="100" y2="35"/>
-</svg>`;
+  <line x1="0" y1="22" x2="10" y2="22"/><line x1="0" y1="48" x2="10" y2="48"/>
+  <line x1="78" y1="35" x2="100" y2="35"/></svg>`;
 
 // ============ DATOS ============
 const basicGates = [
@@ -392,13 +833,13 @@ const basicGates = [
   { name: 'OR',  symbol: SVG_OR,  expr: 'A OR B',  fn: (a,b) => (a === 1 || b === 1) ? 1 : 0, color: '#a78bfa' },
   { name: 'NOT', symbol: SVG_NOT, expr: 'NOT A (inversor)', fn: (a) => a === 1 ? 0 : 1, color: '#fbbf24' }
 ];
-
 const derivedGates = [
   { name: 'NAND', symbol: SVG_NAND, expr: 'NOT (A AND B)', fn: (a,b) => !(a === 1 && b === 1) ? 1 : 0, color: '#34d399' },
   { name: 'NOR',  symbol: SVG_NOR,  expr: 'NOT (A OR B)',  fn: (a,b) => !(a === 1 || b === 1) ? 1 : 0, color: '#f87171' },
   { name: 'XOR',  symbol: SVG_XOR,  expr: 'A OR B, pero no ambas', fn: (a,b) => (a !== b) ? 1 : 0, color: '#f472b6' },
   { name: 'XNOR', symbol: SVG_XNOR, expr: 'NOT (A XOR B)', fn: (a,b) => (a === b) ? 1 : 0, color: '#38bdf8' }
 ];
+const allGates = { AND: basicGates[0], OR: basicGates[1], NOT: basicGates[2], NAND: derivedGates[0], NOR: derivedGates[1], XOR: derivedGates[2], XNOR: derivedGates[3] };
 
 const labExercises = [
   { inputs: [[0,0],[0,1],[1,0],[1,1]], outputs: [0,0,0,1], answer: 'AND' },
@@ -410,77 +851,88 @@ const labExercises = [
 ];
 
 const quizQuestions = [
-  { q: '¿Cuál es la salida de una compuerta AND cuando A=1 y B=0?',
-    opts: ['1', '0', 'Depende', 'No se puede saber'], correct: 1,
-    fb: 'La compuerta AND solo da salida 1 cuando TODAS las entradas son 1. Como B=0, la salida es 0.' },
-  { q: '¿Qué compuerta produce una salida 1 cuando TODAS las entradas son 0?',
-    opts: ['AND', 'OR', 'NOR', 'XOR'], correct: 2,
-    fb: 'La compuerta NOR es la inversa de OR. OR da 0 cuando todas las entradas son 0; NOR invierte eso y da 1.' },
-  { q: '¿Cuál es la función de la compuerta NOT?',
-    opts: ['Suma lógica', 'Producto lógico', 'Inversión lógica', 'Comparación'], correct: 2,
-    fb: 'La compuerta NOT (inversor) cambia el valor de entrada: si entra 1, sale 0; si entra 0, sale 1.' },
-  { q: 'Si A=1 y B=1, ¿cuál es la salida de una compuerta XOR?',
-    opts: ['0', '1', 'Depende', 'Indefinido'], correct: 0,
-    fb: 'XOR da salida 1 solo cuando las entradas son DIFERENTES. Si A=1 y B=1 (iguales), la salida es 0.' },
-  { q: '¿Cuál de estas compuertas es la inversa de NAND?',
-    opts: ['NOR', 'AND', 'OR', 'XNOR'], correct: 1,
-    fb: 'NAND = NOT (A AND B). Su inversa es AND. Si invertís dos veces, volvés al AND original.' },
-  { q: '¿Qué compuerta da salida 1 cuando las dos entradas son iguales?',
-    opts: ['XOR', 'XNOR', 'NAND', 'NOR'], correct: 1,
-    fb: 'XNOR es la inversa de XOR. Mientras XOR da 1 cuando son diferentes, XNOR da 1 cuando son iguales.' },
-  { q: '¿Cuál es la expresión booleana de la compuerta NOR?',
-    opts: ['A + B', '<span class="overline">(A + B)</span>', 'A · B', '<span class="overline">(A · B)</span>'], correct: 1,
-    fb: 'NOR = NOT (A OR B) = <span class="overline">(A + B)</span>. Es la inversión de la suma lógica.' },
-  { q: '¿Por qué se dice que NAND y NOR son "compuertas universales"?',
-    opts: ['Porque son las más rápidas', 'Porque con ellas se pueden construir todas las demás', 'Porque funcionan con cualquier voltaje', 'Porque son las más baratas'], correct: 1,
-    fb: 'NAND y NOR son universales porque con solo usar una de ellas (y repetirla) se pueden implementar AND, OR y NOT.' }
+  { q: '¿Cuál es la salida de AND cuando A=1 y B=0?', opts: ['1', '0', 'Depende', 'No se puede saber'], correct: 1,
+    fb: 'AND solo da 1 cuando TODAS las entradas son 1. Como B=0, la salida es 0.' },
+  { q: '¿Qué compuerta invierte el valor de entrada (1→0, 0→1)?', opts: ['AND', 'OR', 'NOT', 'XOR'], correct: 2,
+    fb: 'NOT es el inversor: cambia 1 por 0 y 0 por 1.' },
+  { q: 'Si A=1 y B=1, ¿cuál es la salida de OR?', opts: ['0', '1', 'Depende', 'Indefinido'], correct: 1,
+    fb: 'OR da 1 cuando al menos una entrada es 1.' }
 ];
 
 // ============ ESTADO ============
 const gateState = {};
-let currentLab = 0;
-let labAnswered = false;
-let quizIndex = 0;
-let quizScore = 0;
-let quizAnswered = false;
+let currentLab = 0, labAnswered = false;
+let quizIndex = 0, quizScore = 0, quizAnswered = false;
+let currentScreen = 'inicio';
+let circA = 0, circB = 0;
+
+// ============ TEMA ============
+function toggleTheme() {
+  document.body.classList.toggle('light');
+  const isLight = document.body.classList.contains('light');
+  document.getElementById('btn-theme').textContent = isLight ? '☀️' : '🌙';
+  try { localStorage.setItem('theme', isLight ? 'light' : 'dark'); } catch {}
+}
+(function initTheme() {
+  try {
+    if (localStorage.getItem('theme') === 'light') {
+      document.body.classList.add('light');
+      document.getElementById('btn-theme').textContent = '☀️';
+    }
+  } catch {}
+})();
+
+// ============ VOZ ============
+function speak(text) {
+  if (!('speechSynthesis' in window)) { showToast('Tu navegador no soporta voz'); return; }
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = 'es-AR'; u.rate = 1;
+  speechSynthesis.speak(u);
+}
+function speakIntro() {
+  speak('Bienvenido al laboratorio prosumidor de compuertas lógicas. Podés explorar las compuertas, practicar con tablas y expresiones, diseñar tu propio circuito eléctrico, hacer el quiz, crear tu tarjeta de compuerta favorita y generar tu certificado.');
+}
 
 // ============ NAVEGACIÓN ============
 function goTo(screen) {
+  currentScreen = screen;
   document.querySelectorAll('.card').forEach(c => c.classList.add('hidden'));
   const el = document.getElementById('screen-' + screen);
   if (el) el.classList.remove('hidden');
+
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  const tabs = document.querySelectorAll('.tab');
+  const map = { inicio:0, basicas:1, derivadas:2, constructor:3, editor:4, laboratorio:5, circuito:6, quiz:7, resultado:7, produccion:8, certificado:9 };
+  if (map[screen] !== undefined && tabs[map[screen]]) tabs[map[screen]].classList.add('active');
+
   if (screen === 'basicas') renderBasicGates();
   if (screen === 'derivadas') renderDerivedGates();
+  if (screen === 'constructor') renderConstructor();
+  if (screen === 'editor') renderEditor();
   if (screen === 'laboratorio') { currentLab = 0; labAnswered = false; renderLab(); }
+  if (screen === 'circuito') updateCircuit();
   if (screen === 'quiz') { quizIndex = 0; quizScore = 0; quizAnswered = false; renderQuiz(); }
+  if (screen === 'produccion') updateProdGate();
+  if (screen === 'certificado') setDefaultDate();
+
   updateProgress(screen);
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
-
 function updateProgress(screen) {
-  const steps = { inicio: 0, basicas: 25, derivadas: 50, laboratorio: 75, quiz: 90, resultado: 100 };
+  const steps = { inicio: 0, basicas: 8, derivadas: 16, constructor: 25, editor: 33, laboratorio: 42, circuito: 55, quiz: 70, resultado: 78, produccion: 88, certificado: 100 };
   document.getElementById('progress').style.width = (steps[screen] || 0) + '%';
 }
 
 // ============ COMPUERTAS ============
 function renderBasicGates() {
-  const container = document.getElementById('basic-gates');
-  container.innerHTML = '';
-  basicGates.forEach((g, i) => {
-    delete gateState['basic-' + i];
-    container.innerHTML += createGateCard(g, i, 'basic');
-  });
+  const c = document.getElementById('basic-gates'); c.innerHTML = '';
+  basicGates.forEach((g, i) => { delete gateState['basic-' + i]; c.innerHTML += createGateCard(g, i, 'basic'); });
 }
-
 function renderDerivedGates() {
-  const container = document.getElementById('derived-gates');
-  container.innerHTML = '';
-  derivedGates.forEach((g, i) => {
-    delete gateState['derived-' + i];
-    container.innerHTML += createGateCard(g, i, 'derived');
-  });
+  const c = document.getElementById('derived-gates'); c.innerHTML = '';
+  derivedGates.forEach((g, i) => { delete gateState['derived-' + i]; c.innerHTML += createGateCard(g, i, 'derived'); });
 }
-
 function createGateCard(g, idx, prefix) {
   const isNot = g.name === 'NOT';
   return `
@@ -507,31 +959,86 @@ function createGateCard(g, idx, prefix) {
       </table>
     </div>`;
 }
-
 function toggleInput(prefix, idx, input) {
   const key = `${prefix}-${idx}`;
   if (!gateState[key]) gateState[key] = { a: 0, b: 0 };
   gateState[key][input] = gateState[key][input] === 1 ? 0 : 1;
-
   const btn = document.getElementById(`btn-${prefix}-${idx}-${input}`);
   const newVal = gateState[key][input];
   btn.textContent = input.toUpperCase() + ': ' + newVal;
   btn.classList.toggle('on', newVal === 1);
-
   const gate = prefix === 'basic' ? basicGates[idx] : derivedGates[idx];
-  const a = gateState[key].a;
-  const b = gateState[key].b;
-
-  let out;
-  if (gate.name === 'NOT') {
-    out = gate.fn(a);
-  } else {
-    out = gate.fn(a, b);
-  }
-
+  const a = gateState[key].a, b = gateState[key].b;
+  const out = gate.name === 'NOT' ? gate.fn(a) : gate.fn(a, b);
   const outEl = document.getElementById(`out-${prefix}-${idx}`);
   outEl.textContent = 'Salida: ' + out;
   outEl.className = 'output-display ' + (out === 1 ? 'output-1' : 'output-0');
+}
+
+// ============ CONSTRUCTOR DE TABLAS ============
+function renderConstructor() {
+  const gateName = document.getElementById('constructor-gate').value;
+  const gate = allGates[gateName];
+  const isNot = gateName === 'NOT';
+  document.getElementById('constructor-symbol').innerHTML = gate.symbol;
+  const table = document.getElementById('constructor-table');
+  let html = `<tr><th>A</th>${!isNot ? '<th>B</th>' : ''}<th>Salida (tu respuesta)</th></tr>`;
+  const rows = isNot ? [[0],[1]] : [[0,0],[0,1],[1,0],[1,1]];
+  rows.forEach((r, i) => {
+    html += `<tr>`;
+    r.forEach(v => html += `<td>${v}</td>`);
+    html += `<td><input type="text" maxlength="1" id="ctor-${i}" placeholder="?" inputmode="numeric"></td>`;
+    html += `</tr>`;
+  });
+  table.innerHTML = html;
+  document.getElementById('constructor-feedback').innerHTML = '';
+}
+function checkConstructor() {
+  const gateName = document.getElementById('constructor-gate').value;
+  const gate = allGates[gateName];
+  const isNot = gateName === 'NOT';
+  const rows = isNot ? [[0],[1]] : [[0,0],[0,1],[1,0],[1,1]];
+  let allOk = true;
+  rows.forEach((r, i) => {
+    const input = document.getElementById(`ctor-${i}`);
+    const val = parseInt(input.value);
+    const expected = isNot ? gate.fn(r[0]) : gate.fn(r[0], r[1]);
+    input.classList.remove('correct', 'incorrect');
+    if (val === expected) input.classList.add('correct');
+    else { input.classList.add('incorrect'); allOk = false; }
+  });
+  const fb = document.getElementById('constructor-feedback');
+  if (allOk) fb.innerHTML = `<div class="feedback ok">✅ ¡Perfecto! Completaste correctamente la tabla de ${gateName}.</div>`;
+  else fb.innerHTML = `<div class="feedback err">❌ Hay errores. Las celdas en rojo no coinciden.</div>`;
+}
+function clearConstructor() {
+  document.querySelectorAll('#constructor-table input').forEach(i => { i.value = ''; i.classList.remove('correct', 'incorrect'); });
+  document.getElementById('constructor-feedback').innerHTML = '';
+}
+
+// ============ EDITOR ============
+function evalExpr(expr, vars) {
+  let js = expr.replace(/\bAND\b/gi, '&&').replace(/\bOR\b/gi, '||').replace(/\bXOR\b/gi, '!==').replace(/\bNOT\b/gi, '!').replace(/\b([ABC])\b/g, (m) => vars[m] ? '1' : '0');
+  try { const result = Function(`"use strict"; return (${js});`)(); return result ? 1 : 0; } catch { return null; }
+}
+function renderEditor() {
+  const expr = document.getElementById('expr-input').value.trim();
+  const result = document.getElementById('editor-result');
+  if (!expr) { result.innerHTML = '<div class="feedback info">Escribí una expresión para ver la tabla.</div>'; return; }
+  const vars = ['A','B','C'].filter(v => new RegExp(`\\b${v}\\b`).test(expr));
+  if (vars.length === 0) { result.innerHTML = '<div class="feedback err">La expresión debe incluir al menos una variable A, B o C.</div>'; return; }
+  const combos = [];
+  const n = vars.length;
+  for (let i = 0; i < Math.pow(2, n); i++) { const combo = {}; vars.forEach((v, j) => combo[v] = (i >> (n - 1 - j)) & 1); combos.push(combo); }
+  let html = `<h3>Tabla de verdad resultante</h3>`;
+  html += `<table class="truth-table" style="max-width:500px; margin:0 auto;">`;
+  html += `<tr>${vars.map(v => `<th>${v}</th>`).join('')}<th>Salida</th></tr>`;
+  combos.forEach(c => {
+    const val = evalExpr(expr, c);
+    html += `<tr>${vars.map(v => `<td>${c[v]}</td>`).join('')}<td style="font-weight:700; color:${val === 1 ? 'var(--green)' : 'var(--muted)'}">${val === null ? '?' : val}</td></tr>`;
+  });
+  html += `</table>`;
+  result.innerHTML = html;
 }
 
 // ============ LABORATORIO ============
@@ -539,27 +1046,18 @@ function renderLab() {
   const ex = labExercises[currentLab];
   const table = document.getElementById('lab-truth-table');
   table.innerHTML = '<tr><th>A</th><th>B</th><th>Salida</th></tr>';
-  ex.inputs.forEach((inp, i) => {
-    table.innerHTML += `<tr><td>${inp[0]}</td><td>${inp[1]}</td><td>${ex.outputs[i]}</td></tr>`;
-  });
-
-  const opts = document.getElementById('lab-options');
-  opts.innerHTML = '';
+  ex.inputs.forEach((inp, i) => { table.innerHTML += `<tr><td>${inp[0]}</td><td>${inp[1]}</td><td>${ex.outputs[i]}</td></tr>`; });
+  const opts = document.getElementById('lab-options'); opts.innerHTML = '';
   ['AND', 'OR', 'NAND', 'NOR', 'XOR', 'XNOR'].forEach(g => {
     const btn = document.createElement('button');
-    btn.className = 'toggle-btn';
-    btn.textContent = g;
-    btn.style.minWidth = '80px';
-    btn.onclick = () => checkLab(g, btn);
-    opts.appendChild(btn);
+    btn.className = 'toggle-btn'; btn.textContent = g; btn.style.minWidth = '80px';
+    btn.onclick = () => checkLab(g, btn); opts.appendChild(btn);
   });
-
   document.getElementById('lab-feedback').innerHTML = '';
   document.getElementById('lab-next').style.display = 'none';
   document.getElementById('lab-to-quiz').classList.add('hidden');
   labAnswered = false;
 }
-
 function checkLab(selected, btn) {
   if (labAnswered) return;
   labAnswered = true;
@@ -567,21 +1065,144 @@ function checkLab(selected, btn) {
   const fb = document.getElementById('lab-feedback');
   if (selected === ex.answer) {
     btn.classList.add('correct');
-    fb.innerHTML = `<div class="feedback ok">✅ ¡Correcto! La tabla corresponde a la compuerta <strong>${ex.answer}</strong>.</div>`;
-    if (currentLab < labExercises.length - 1) {
-      document.getElementById('lab-next').style.display = 'inline-block';
-    } else {
-      document.getElementById('lab-to-quiz').classList.remove('hidden');
-    }
+    fb.innerHTML = `<div class="feedback ok">✅ ¡Correcto! Es ${ex.answer}.</div>`;
+    if (currentLab < labExercises.length - 1) document.getElementById('lab-next').style.display = 'inline-block';
+    else document.getElementById('lab-to-quiz').classList.remove('hidden');
   } else {
     btn.classList.add('incorrect');
-    fb.innerHTML = `<div class="feedback err">❌ Incorrecto. La respuesta correcta era <strong>${ex.answer}</strong>. Revisá la tabla de verdad y las propiedades de cada compuerta.</div>`;
+    fb.innerHTML = `<div class="feedback err">❌ Era ${ex.answer}.</div>`;
     document.getElementById('lab-next').style.display = 'inline-block';
   }
 }
+function nextLab() { if (currentLab < labExercises.length - 1) { currentLab++; renderLab(); } }
 
-function nextLab() {
-  if (currentLab < labExercises.length - 1) { currentLab++; renderLab(); }
+// ============ CONSTRUCTOR DE CIRCUITOS ============
+function toggleCircInput(which) {
+  if (which === 'a') circA = circA === 1 ? 0 : 1;
+  if (which === 'b') circB = circB === 1 ? 0 : 1;
+  document.getElementById('circ-a').textContent = 'A: ' + circA;
+  document.getElementById('circ-a').classList.toggle('on', circA === 1);
+  document.getElementById('circ-b').textContent = 'B: ' + circB;
+  document.getElementById('circ-b').classList.toggle('on', circB === 1);
+  updateCircuit();
+}
+
+function updateCircuit() {
+  const gateName = document.getElementById('circ-gate').value;
+  const gate = allGates[gateName];
+  let out;
+  if (gateName === 'NOT') {
+    out = gate.fn(circA);
+  } else {
+    out = gate.fn(circA, circB);
+  }
+  const light = document.getElementById('circ-light');
+  const status = document.getElementById('circ-status');
+  if (out === 1) {
+    light.classList.remove('off'); light.classList.add('on');
+    status.textContent = '💡 Luz: ENCENDIDA';
+    status.style.color = 'var(--green)';
+    status.style.fontWeight = '900';
+  } else {
+    light.classList.remove('on'); light.classList.add('off');
+    status.textContent = 'Luz: APAGADA';
+    status.style.color = 'var(--muted)';
+    status.style.fontWeight = '700';
+  }
+}
+
+function testCircuit() {
+  const gateName = document.getElementById('circ-gate').value;
+  const gate = allGates[gateName];
+  const isNot = gateName === 'NOT';
+  const combos = isNot ? [[0],[1]] : [[0,0],[0,1],[1,0],[1,1]];
+  let html = `<h3>🧪 Resultado de todas las combinaciones</h3>`;
+  html += `<table class="truth-table" style="max-width:500px; margin:0 auto;">`;
+  html += `<tr>${isNot ? '<th>A</th>' : '<th>A</th><th>B</th>'}<th>Salida</th><th>Luz</th></tr>`;
+  combos.forEach(c => {
+    const out = isNot ? gate.fn(c[0]) : gate.fn(c[0], c[1]);
+    const icon = out === 1 ? '💡 ENCENDIDA' : '⚫ apagada';
+    html += `<tr>${c.map(v => `<td>${v}</td>`).join('')}<td style="font-weight:700; color:${out === 1 ? 'var(--green)' : 'var(--muted)'}">${out}</td><td>${icon}</td></tr>`;
+  });
+  html += `</table>`;
+  document.getElementById('circuit-result').innerHTML = html;
+  showToast('🧪 Combinaciones probadas');
+}
+
+function exportCircuit() {
+  const name = document.getElementById('circ-name').value.trim() || 'Estudiante';
+  const title = document.getElementById('circ-title').value.trim() || 'Circuito sin título';
+  const gateName = document.getElementById('circ-gate').value;
+  const gate = allGates[gateName];
+  const isNot = gateName === 'NOT';
+  const combos = isNot ? [[0],[1]] : [[0,0],[0,1],[1,0],[1,1]];
+
+  let code = `╔══════════════════════════════════════════╗
+║   CIRCUITO ELÉCTRICO BÁSICO              ║
+╚══════════════════════════════════════════╝
+
+Estudiante: ${name}
+Circuito: ${title}
+Compuerta usada: ${gateName} (${gate.expr})
+
+TABLA DE COMPORTAMIENTO:
+${isNot ? 'A → Salida → Luz' : 'A, B → Salida → Luz'}
+----------------------------------------
+`;
+  combos.forEach(c => {
+    const out = isNot ? gate.fn(c[0]) : gate.fn(c[0], c[1]);
+    const luz = out === 1 ? '💡 ENCENDIDA' : '⚫ apagada';
+    code += `${c.join(', ')} → ${out} → ${luz}\n`;
+  });
+  code += `----------------------------------------
+
+VERIFICACIÓN DOCENTE:
+[  ] El circuito es correcto
+[  ] La luz enciende en la combinación esperada
+[  ] Observaciones: _______________________
+
+IES N° 5 "José Eugenio Tello" — San Salvador de Jujuy
+Arquitectura de Computadoras — Compuertas Lógicas
+`;
+  downloadFile(code, `circuito_${gateName}_${name.replace(/\s+/g, '_')}.txt`, 'text/plain');
+  showToast('📤 Circuito exportado');
+}
+
+function shareCircuit() {
+  const name = document.getElementById('circ-name').value.trim() || 'Estudiante';
+  const title = document.getElementById('circ-title').value.trim() || 'Circuito sin título';
+  const gateName = document.getElementById('circ-gate').value;
+  const gate = allGates[gateName];
+  const isNot = gateName === 'NOT';
+  const combos = isNot ? [[0],[1]] : [[0,0],[0,1],[1,0],[1,1]];
+
+  let text = `⚡ CIRCUITO ELÉCTRICO BÁSICO\n\n`;
+  text += `Estudiante: ${name}\n`;
+  text += `Circuito: ${title}\n`;
+  text += `Compuerta: ${gateName}\n\n`;
+  combos.forEach(c => {
+    const out = isNot ? gate.fn(c[0]) : gate.fn(c[0], c[1]);
+    text += `${c.join(',')} → ${out} → ${out === 1 ? '💡 ENCENDIDA' : '⚫ apagada'}\n`;
+  });
+  text += `\nVerificá mi circuito, profe 🙌`;
+
+  if (navigator.share) {
+    navigator.share({ title: 'Mi circuito eléctrico', text }).catch(() => {});
+  } else {
+    navigator.clipboard.writeText(text).then(() => showToast('📋 Copiado al portapapeles'));
+  }
+}
+
+function resetCircuit() {
+  circA = 0; circB = 0;
+  document.getElementById('circ-a').textContent = 'A: 0';
+  document.getElementById('circ-a').classList.remove('on');
+  document.getElementById('circ-b').textContent = 'B: 0';
+  document.getElementById('circ-b').classList.remove('on');
+  document.getElementById('circ-gate').value = 'AND';
+  document.getElementById('circuit-result').innerHTML = '';
+  updateCircuit();
+  showToast('🔄 Circuito reiniciado');
 }
 
 // ============ QUIZ ============
@@ -590,25 +1211,15 @@ function renderQuiz() {
   container.innerHTML = '';
   document.getElementById('btn-resultado').style.display = 'none';
   quizAnswered = false;
-
-  if (quizIndex >= quizQuestions.length) {
-    document.getElementById('btn-resultado').style.display = 'inline-block';
-    return;
-  }
-
+  if (quizIndex >= quizQuestions.length) { document.getElementById('btn-resultado').style.display = 'inline-block'; return; }
   const q = quizQuestions[quizIndex];
   let html = `<p style="font-weight:700; margin-bottom:12px;">Pregunta ${quizIndex + 1} de ${quizQuestions.length}</p>`;
   html += `<p style="margin-bottom:16px;">${q.q}</p>`;
-  q.opts.forEach((opt, i) => {
-    html += `<button class="quiz-option" onclick="checkQuiz(${i}, this)">${String.fromCharCode(65+i)}. ${opt}</button>`;
-  });
+  q.opts.forEach((opt, i) => { html += `<button class="quiz-option" onclick="checkQuiz(${i}, this)">${String.fromCharCode(65+i)}. ${opt}</button>`; });
   html += `<div id="quiz-feedback" style="margin-top:12px;"></div>`;
-  html += `<div style="margin-top:16px; text-align:center;">
-    <button class="btn" id="quiz-next" style="display:none;" onclick="nextQuiz()">Siguiente →</button>
-  </div>`;
+  html += `<div style="margin-top:16px; text-align:center;"><button class="btn" id="quiz-next" style="display:none;" onclick="nextQuiz()">Siguiente →</button></div>`;
   container.innerHTML = html;
 }
-
 function checkQuiz(selected, btn) {
   if (quizAnswered) return;
   quizAnswered = true;
@@ -616,46 +1227,124 @@ function checkQuiz(selected, btn) {
   const fb = document.getElementById('quiz-feedback');
   const options = btn.parentElement.querySelectorAll('.quiz-option');
   options.forEach((o, i) => { if (i === q.correct) o.classList.add('correct'); });
-  if (selected === q.correct) {
-    quizScore++;
-    fb.innerHTML = `<div class="feedback ok">✅ ${q.fb}</div>`;
-  } else {
-    btn.classList.add('incorrect');
-    fb.innerHTML = `<div class="feedback err">❌ ${q.fb}</div>`;
-  }
+  if (selected === q.correct) { quizScore++; fb.innerHTML = `<div class="feedback ok">✅ ${q.fb}</div>`; }
+  else { btn.classList.add('incorrect'); fb.innerHTML = `<div class="feedback err">❌ ${q.fb}</div>`; }
   options.forEach(o => o.disabled = true);
   document.getElementById('quiz-next').style.display = 'inline-block';
-  if (quizIndex === quizQuestions.length - 1) {
-    document.getElementById('quiz-next').textContent = 'Ver Resultado →';
-  }
+  if (quizIndex === quizQuestions.length - 1) document.getElementById('quiz-next').textContent = 'Ver Resultado →';
 }
-
-function nextQuiz() {
-  quizIndex++;
-  if (quizIndex >= quizQuestions.length) { mostrarResultado(); } else { renderQuiz(); }
-}
-
+function nextQuiz() { quizIndex++; if (quizIndex >= quizQuestions.length) { mostrarResultado(); } else { renderQuiz(); } }
 function mostrarResultado() {
   document.querySelectorAll('.card').forEach(c => c.classList.add('hidden'));
   document.getElementById('screen-resultado').classList.remove('hidden');
   document.getElementById('final-score').textContent = quizScore + '/' + quizQuestions.length;
   const pct = (quizScore / quizQuestions.length) * 100;
   let msg = '';
-  if (pct === 100) msg = '🏆 ¡Perfecto! Dominás las compuertas lógicas.';
-  else if (pct >= 75) msg = '👏 ¡Muy bien! Tenés una base sólida. Repasá los errores.';
-  else if (pct >= 50) msg = '💪 Vas por buen camino. Te recomendamos repasar las tablas de verdad.';
-  else msg = '📚 Necesitás repasar el material. Volvé a los módulos y practicá con el laboratorio.';
+  if (pct === 100) msg = '🏆 ¡Perfecto! Dominás las compuertas.';
+  else if (pct >= 66) msg = '👏 ¡Muy bien! Base sólida.';
+  else msg = '📚 Repasá el material y volvé a intentar.';
   document.getElementById('final-message').textContent = msg;
   updateProgress('resultado');
 }
+function reiniciar() { quizIndex = 0; quizScore = 0; quizAnswered = false; currentLab = 0; labAnswered = false; goTo('inicio'); }
 
-function reiniciar() {
-  quizIndex = 0; quizScore = 0; quizAnswered = false;
-  currentLab = 0; labAnswered = false;
-  goTo('inicio');
+// ============ PRODUCCIÓN ============
+function updateProdGate() {
+  const gateName = document.getElementById('prod-gate').value;
+  document.getElementById('prod-symbol').innerHTML = allGates[gateName].symbol;
+}
+function generateProdCard() {
+  const name = document.getElementById('prod-name').value.trim() || 'Estudiante';
+  const gateName = document.getElementById('prod-gate').value;
+  const gate = allGates[gateName];
+  const what = document.getElementById('prod-what').value.trim();
+  const use = document.getElementById('prod-use').value.trim();
+  if (!what || !use) { showToast('⚠️ Completá qué hace y para qué sirve'); return; }
+  const date = new Date().toLocaleDateString('es-AR', { year: 'numeric', month: 'long', day: 'numeric' });
+  const result = document.getElementById('prod-result');
+  result.innerHTML = `
+    <div class="prod-card">
+      <div class="prod-title">🎨 Mi compuerta favorita: ${gateName}</div>
+      <div style="display:flex; justify-content:center; margin:12px 0;">
+        <div class="gate-symbol" style="height:80px;">${gate.symbol}</div>
+      </div>
+      <div class="prod-body"><strong>¿Qué hace?</strong>
+${escapeHtml(what)}
+
+<strong>¿Para qué sirve?</strong>
+${escapeHtml(use)}</div>
+      <div class="prod-footer">Producido por <strong>${escapeHtml(name)}</strong> · ${date}<br>IES N° 5 "José Eugenio Tello" — San Salvador de Jujuy</div>
+    </div>`;
+  showToast('🎨 Tarjeta generada');
+  window._lastProdCard = { name, gateName, what, use, date };
+}
+function downloadProdCard() {
+  if (!window._lastProdCard) { showToast('Primero generá tu tarjeta'); return; }
+  const d = window._lastProdCard;
+  const text = `MI COMPUERTA FAVORITA: ${d.gateName}\n========================================\n\n¿Qué hace?\n${d.what}\n\n¿Para qué sirve?\n${d.use}\n\n----------------------------------------\nProducido por: ${d.name}\nFecha: ${d.date}\nIES N° 5 "José Eugenio Tello" — San Salvador de Jujuy\n`;
+  downloadFile(text, `mi_compuerta_${d.gateName}.txt`, 'text/plain');
+}
+function shareProdCard() {
+  if (!window._lastProdCard) { showToast('Primero generá tu tarjeta'); return; }
+  const d = window._lastProdCard;
+  const text = `🎨 Mi compuerta favorita: ${d.gateName}\n\n¿Qué hace? ${d.what}\n\n¿Para qué sirve? ${d.use}\n\n— Producido por ${d.name} (IES N° 5, Jujuy)`;
+  if (navigator.share) navigator.share({ title: 'Mi compuerta favorita', text }).catch(() => {});
+  else navigator.clipboard.writeText(text).then(() => showToast('📋 Copiado al portapapeles'));
 }
 
-document.addEventListener('DOMContentLoaded', () => { updateProgress('inicio'); });
+// ============ CERTIFICADO ============
+function setDefaultDate() {
+  const today = new Date().toISOString().split('T')[0];
+  const el = document.getElementById('cert-date');
+  if (el && !el.value) el.value = today;
+}
+function generateCertificate() {
+  const name = document.getElementById('cert-name').value.trim();
+  const date = document.getElementById('cert-date').value;
+  if (!name) { showToast('⚠️ Escribí tu nombre'); return; }
+  const dateFormatted = date ? new Date(date + 'T12:00:00').toLocaleDateString('es-AR', { year: 'numeric', month: 'long', day: 'numeric' }) : new Date().toLocaleDateString('es-AR');
+  const result = document.getElementById('cert-result');
+  result.innerHTML = `
+    <div class="certificate" id="cert-canvas">
+      <h2>🏆 Certificado de Logros</h2>
+      <div class="cert-text">Se certifica que</div>
+      <div class="cert-name">${escapeHtml(name)}</div>
+      <div class="cert-text">completó el <strong>Laboratorio Interactivo de Compuertas Lógicas</strong><br>
+        correspondiente a la unidad curricular <strong>Arquitectura de Computadoras</strong><br>
+        de la <strong>Tecnicatura Superior en Soporte de Infraestructura de TI</strong></div>
+      <div class="cert-text" style="margin-top:16px;">Temas abordados: AND, OR, NOT, NAND, NOR, XOR, XNOR</div>
+      <div class="cert-date">San Salvador de Jujuy, ${dateFormatted}</div>
+      <div class="cert-seal">🎓</div>
+      <div style="margin-top:12px; font-size:0.8rem; color:#64748b;">IES N° 5 "José Eugenio Tello"</div>
+    </div>`;
+  showToast('🏆 Certificado generado');
+}
+function printCertificate() {
+  if (!document.getElementById('cert-canvas')) { showToast('Primero generá el certificado'); return; }
+  window.print();
+}
+
+// ============ UTILIDADES ============
+function downloadFile(content, filename, type) {
+  const blob = new Blob([content], { type });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename; a.click();
+  URL.revokeObjectURL(url);
+}
+function escapeHtml(s) { return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(window._toastTimer);
+  window._toastTimer = setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  updateProgress('inicio');
+  setDefaultDate();
+});
 </script>
 </body>
 </html>
