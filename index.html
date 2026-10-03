@@ -18,6 +18,8 @@
     --muted: #94a3b8;
     --border: #334155;
     --shadow: rgba(34,211,238,0.3);
+    --wire-on: #fbbf24;
+    --wire-off: #475569;
   }
   body.light {
     --bg: #f1f5f9;
@@ -39,7 +41,7 @@
     padding: 20px;
     transition: background 0.3s, color 0.3s;
   }
-  .app { width: 100%; max-width: 950px; }
+  .app { width: 100%; max-width: 1100px; }
 
   .header {
     text-align: center;
@@ -270,7 +272,7 @@
   .truth-table input.correct { border-color: var(--green); background: rgba(52,211,153,0.15); }
   .truth-table input.incorrect { border-color: var(--red); background: rgba(248,113,113,0.15); }
 
-  .expr-input, .form-input, .form-select, .form-textarea {
+  .form-input, .form-select, .form-textarea {
     width: 100%;
     padding: 12px;
     border-radius: 10px;
@@ -281,8 +283,7 @@
     font-family: inherit;
     margin-bottom: 10px;
   }
-  .expr-input { font-family: 'Courier New', monospace; font-size: 1.05rem; }
-  .form-input:focus, .form-select:focus, .form-textarea:focus, .expr-input:focus { outline: 2px solid var(--accent); }
+  .form-input:focus, .form-select:focus, .form-textarea:focus { outline: 2px solid var(--accent); }
   .form-textarea { min-height: 90px; resize: vertical; }
 
   .form-group { margin-bottom: 12px; }
@@ -337,8 +338,6 @@
     border-radius: 16px;
     padding: 24px;
     margin-top: 16px;
-    position: relative;
-    overflow: hidden;
   }
   .prod-card .prod-title {
     font-size: 1.4rem;
@@ -355,129 +354,255 @@
     padding-top: 10px;
   }
 
-  /* CIRCUITO */
-  .circuit-canvas {
+  /* ============ SIMULADOR DE CIRCUITOS ============ */
+  .sim-controls {
     background: var(--card-soft);
-    border: 2px dashed var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 16px;
+    border: 1px solid var(--border);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+    justify-content: center;
+  }
+  .sim-control-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .sim-control-group label {
+    font-size: 0.7rem;
+    color: var(--muted);
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+  .sim-control-group select {
+    background: var(--card);
+    border: 2px solid var(--border);
+    color: var(--text);
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    cursor: pointer;
+  }
+  .sim-control-group select:focus { outline: 2px solid var(--accent); }
+
+  .simulator {
+    background: #1a2332;
     border-radius: 16px;
     padding: 24px;
-    margin: 16px 0;
-    text-align: center;
-    min-height: 280px;
+    border: 1px solid var(--border);
+    overflow-x: auto;
+    margin-bottom: 16px;
+  }
+  .circuit-board {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    min-height: 380px;
+    position: relative;
+  }
+
+  .input-column {
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+    padding-right: 20px;
+  }
+  .input-switch {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    gap: 16px;
+    gap: 6px;
+    cursor: pointer;
+    user-select: none;
   }
-  .circuit-row {
+  .input-switch .label {
+    font-size: 1rem;
+    font-weight: 900;
+    color: var(--text);
+  }
+  .input-switch .switch-body {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: var(--card-soft);
+    border: 3px solid var(--border);
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 16px;
-    flex-wrap: wrap;
-  }
-  .circuit-node {
-    background: var(--card);
-    border: 2px solid var(--border);
-    border-radius: 12px;
-    padding: 12px 18px;
-    font-weight: 700;
-    font-size: 0.95rem;
-    min-width: 90px;
-    text-align: center;
+    font-size: 1.5rem;
+    font-weight: 900;
     transition: all 0.3s;
   }
-  .circuit-node.active {
-    border-color: var(--accent);
-    box-shadow: 0 0 15px var(--shadow);
-  }
-  .circuit-input-btn {
-    background: var(--card);
-    border: 2px solid var(--border);
-    border-radius: 12px;
-    padding: 12px 20px;
-    font-weight: 700;
-    font-size: 1rem;
-    cursor: pointer;
-    min-width: 90px;
-    color: var(--text);
-    transition: all 0.3s;
-  }
-  .circuit-input-btn.on {
+  .input-switch.on .switch-body {
     background: var(--green);
     border-color: var(--green);
     color: #0f172a;
+    box-shadow: 0 0 20px var(--green);
   }
-  .circuit-arrow {
-    font-size: 1.5rem;
+  .input-switch.off .switch-body {
+    background: var(--card-soft);
+    border-color: var(--border);
     color: var(--muted);
   }
-  .circuit-light {
-    font-size: 3.5rem;
-    padding: 16px 24px;
-    border-radius: 16px;
-    transition: all 0.4s;
-    background: var(--card);
-    border: 2px solid var(--border);
-  }
-  .circuit-light.on {
-    background: radial-gradient(circle, var(--yellow), rgba(251,191,36,0.3));
-    border-color: var(--yellow);
-    box-shadow: 0 0 40px var(--yellow);
-    transform: scale(1.1);
-  }
-  .circuit-light.off { opacity: 0.5; }
 
-  .circuit-gate-select {
-    background: var(--card);
-    border: 2px solid var(--border);
-    border-radius: 12px;
-    padding: 10px 16px;
-    font-weight: 700;
-    font-size: 0.95rem;
-    color: var(--text);
-    cursor: pointer;
+  .wire {
+    height: 6px;
+    background: var(--wire-off);
+    border-radius: 3px;
+    transition: all 0.3s;
+    min-width: 40px;
   }
-  .circuit-gate-select:focus { outline: 2px solid var(--accent); }
+  .wire.on {
+    background: var(--wire-on);
+    box-shadow: 0 0 12px var(--wire-on);
+  }
 
-  .circuit-code {
-    background: #0b1220;
-    color: #22d3ee;
-    font-family: 'Courier New', monospace;
-    padding: 16px;
+  .gate-stage {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    padding: 0 10px;
+  }
+  .gate-stage-title {
+    font-size: 0.7rem;
+    font-weight: 900;
+    color: var(--accent2);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    background: var(--card-soft);
+    padding: 4px 12px;
     border-radius: 10px;
-    font-size: 0.9rem;
-    white-space: pre-wrap;
-    line-height: 1.6;
-    margin-top: 12px;
     border: 1px solid var(--border);
   }
 
-  /* CERTIFICADO */
-  .certificate {
-    background: #ffffff;
-    color: #0f172a;
-    border: 8px double #22d3ee;
-    border-radius: 12px;
-    padding: 40px;
-    text-align: center;
-    max-width: 700px;
-    margin: 16px auto;
-    font-family: Georgia, serif;
+  .gate-visual {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
   }
-  .certificate h2 { color: #0f172a; font-size: 2rem; margin-bottom: 12px; }
-  .certificate .cert-name {
-    font-size: 1.8rem;
+  .gate-visual .gate-name {
+    font-size: 0.75rem;
     font-weight: 900;
-    color: #0e7490;
-    margin: 16px 0;
-    border-bottom: 2px solid #22d3ee;
-    padding-bottom: 8px;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 1px;
   }
-  .certificate .cert-text { font-size: 1rem; line-height: 1.7; margin: 12px 0; }
-  .certificate .cert-date { margin-top: 24px; font-size: 0.9rem; color: #64748b; }
-  .certificate .cert-seal { font-size: 3rem; margin-top: 12px; }
+  .gate-visual .gate-body {
+    width: 100px;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .gate-visual .gate-body svg {
+    width: 100%;
+    height: 100%;
+  }
+  .gate-visual .gate-body svg path,
+  .gate-visual .gate-body svg line,
+  .gate-visual .gate-body svg circle,
+  .gate-visual .gate-body svg polygon {
+    stroke: var(--accent);
+    fill: none;
+    stroke-width: 4;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+  }
+  .gate-visual .gate-body svg circle.neg {
+    fill: var(--accent);
+    stroke: var(--accent);
+  }
+  .gate-visual .gate-output {
+    font-size: 0.8rem;
+    font-weight: 900;
+    padding: 2px 10px;
+    border-radius: 8px;
+    background: var(--card-soft);
+    border: 1px solid var(--border);
+    min-width: 30px;
+    text-align: center;
+  }
+  .gate-visual .gate-output.on {
+    background: var(--green);
+    color: #0f172a;
+    border-color: var(--green);
+  }
+
+  .led-column {
+    padding-left: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+  .led {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    background: var(--card-soft);
+    border: 4px solid var(--border);
+    transition: all 0.4s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+  }
+  .led.on {
+    background: var(--green);
+    border-color: var(--green);
+    box-shadow: 0 0 40px var(--green), 0 0 80px var(--green);
+  }
+  .led.off {
+    background: #3a1a1a;
+    border-color: var(--red);
+  }
+  .led-label {
+    font-size: 0.85rem;
+    font-weight: 900;
+    padding: 6px 14px;
+    border-radius: 10px;
+    background: var(--card-soft);
+    border: 2px solid var(--border);
+  }
+  .led-label.on {
+    background: var(--green);
+    color: #0f172a;
+    border-color: var(--green);
+  }
+  .led-label.off { color: var(--muted); }
+
+  .formula-box {
+    background: #0b1220;
+    color: var(--accent);
+    font-family: 'Courier New', monospace;
+    padding: 14px;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: 700;
+    text-align: center;
+    border: 1px solid var(--border);
+    margin-bottom: 12px;
+  }
+
+  .truth-output {
+    background: var(--card-soft);
+    border-radius: 10px;
+    padding: 16px;
+    margin-top: 12px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.85rem;
+    white-space: pre-wrap;
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
 
   .toast {
     position: fixed;
@@ -497,24 +622,19 @@
   }
   .toast.show { transform: translateX(-50%) translateY(0); }
 
-  @media print {
-    body * { visibility: hidden; }
-    .certificate, .certificate * { visibility: visible; }
-    .certificate { position: absolute; top: 0; left: 0; width: 100%; }
-    .certificate h2 { color: #0f172a !important; -webkit-text-fill-color: #0f172a !important; }
-  }
-
-  @media (max-width: 600px) {
+  @media (max-width: 700px) {
     .header h1 { font-size: 1.3rem; }
     .header-actions { top: 8px; right: 8px; }
     .icon-btn { width: 32px; height: 32px; font-size: 0.9rem; }
     .gate-symbol { height: 60px; }
     .gate-symbol svg { height: 50px; }
     .output-display { font-size: 1.5rem; }
-    .circuit-light { font-size: 2.5rem; }
-    .certificate { padding: 20px; }
-    .certificate h2 { font-size: 1.4rem; }
-    .certificate .cert-name { font-size: 1.3rem; }
+    .circuit-board { flex-direction: column; gap: 20px; }
+    .input-column { flex-direction: row; padding-right: 0; }
+    .gate-stage { flex-direction: row; }
+    .wire { width: 6px; height: 30px; min-width: 6px; }
+    .gate-visual .gate-body { width: 80px; height: 65px; }
+    .led { width: 55px; height: 55px; }
   }
 </style>
 </head>
@@ -524,7 +644,6 @@
   <div class="header">
     <div class="header-actions">
       <button class="icon-btn" id="btn-theme" onclick="toggleTheme()" title="Cambiar tema">🌙</button>
-      <button class="icon-btn" onclick="speakIntro()" title="Leer en voz alta">🔊</button>
     </div>
     <h1>⚡ Compuertas Lógicas</h1>
     <p>Laboratorio Interactivo Prosumidor</p>
@@ -537,18 +656,16 @@
     <button class="tab" onclick="goTo('basicas')">🔌 Básicas</button>
     <button class="tab" onclick="goTo('derivadas')">🧩 Derivadas</button>
     <button class="tab" onclick="goTo('constructor')">✏️ Constructor</button>
-    <button class="tab" onclick="goTo('editor')">📝 Editor</button>
     <button class="tab" onclick="goTo('laboratorio')">🔬 Lab</button>
-    <button class="tab" onclick="goTo('circuito')">⚡ Circuito</button>
+    <button class="tab" onclick="goTo('simulador')">⚡ Simulador</button>
     <button class="tab" onclick="goTo('quiz')">📋 Quiz</button>
-    <button class="tab" onclick="goTo('produccion')">🎨 Producción</button>
-    <button class="tab" onclick="goTo('certificado')">🏆 Certificado</button>
+    <button class="tab" onclick="goTo('produccion')">🎨 Mi tarjeta</button>
   </div>
 
   <!-- INICIO -->
   <div class="card" id="screen-inicio">
     <h2>🎯 Objetivo del recurso</h2>
-    <p>Identificar, diferenciar y aplicar las compuertas lógicas <strong>AND, OR, NOT, NAND, NOR, XOR y XNOR</strong> mediante la resolución y <strong>producción</strong> de contenido interactivo, incluyendo el <strong>diseño de un circuito eléctrico básico</strong> que encienda una luz.</p>
+    <p>Identificar, diferenciar y aplicar las compuertas lógicas <strong>AND, OR, NOT, NAND, NOR, XOR y XNOR</strong> mediante la resolución y <strong>producción</strong> de contenido interactivo, incluyendo el <strong>diseño de circuitos eléctricos</strong> que enciendan una luz.</p>
     <div style="margin-top:12px;">
       <span class="tag">AND</span><span class="tag">OR</span><span class="tag">NOT</span>
       <span class="tag">NAND</span><span class="tag">NOR</span><span class="tag">XOR</span><span class="tag">XNOR</span>
@@ -558,12 +675,10 @@
       <li>🔌 <strong>Básicas:</strong> explorá AND, OR y NOT con sus íconos y tablas.</li>
       <li>🧩 <strong>Derivadas:</strong> explorá NAND, NOR, XOR y XNOR.</li>
       <li>✏️ <strong>Constructor:</strong> llená tablas de verdad y verificá.</li>
-      <li>📝 <strong>Editor:</strong> escribí expresiones booleanas y velas resueltas.</li>
       <li>🔬 <strong>Lab:</strong> identificá la compuerta a partir de la tabla.</li>
-      <li>⚡ <strong>Circuito:</strong> diseñá tu propio circuito que encienda una luz.</li>
+      <li>⚡ <strong>Simulador:</strong> armá circuitos con cables que se iluminan y encendé un LED.</li>
       <li>📋 <strong>Quiz:</strong> evaluá lo que aprendiste.</li>
-      <li>🎨 <strong>Producción:</strong> creá tu tarjeta de compuerta favorita.</li>
-      <li>🏆 <strong>Certificado:</strong> generá tu certificado de logros.</li>
+      <li>🎨 <strong>Mi tarjeta:</strong> creá tu tarjeta de compuerta favorita.</li>
     </ul>
     <div style="text-align:center; margin-top:24px;">
       <button class="btn" onclick="goTo('basicas')">Comenzar →</button>
@@ -620,17 +735,6 @@
     </div>
   </div>
 
-  <!-- EDITOR -->
-  <div class="card hidden" id="screen-editor">
-    <h2>📝 Editor de Expresiones Booleanas</h2>
-    <p>Escribí una expresión usando <code>AND</code>, <code>OR</code>, <code>NOT</code>, <code>XOR</code> y variables <code>A</code>, <code>B</code>, <code>C</code>. El sistema calcula la tabla de verdad.</p>
-    <input type="text" class="expr-input" id="expr-input" placeholder="Ej: (A AND B) OR NOT C" value="A AND B" oninput="renderEditor()">
-    <div id="editor-result"></div>
-    <div style="text-align:center; margin-top:20px;">
-      <button class="btn btn-secondary" onclick="goTo('constructor')">← Volver</button>
-    </div>
-  </div>
-
   <!-- LABORATORIO -->
   <div class="card hidden" id="screen-laboratorio">
     <h2>🔬 Laboratorio: Identificá la Compuerta</h2>
@@ -645,32 +749,23 @@
       <div id="lab-feedback" style="margin-top:16px;"></div>
     </div>
     <div style="text-align:center; margin-top:20px;">
-      <button class="btn btn-secondary" onclick="goTo('editor')">← Volver</button>
+      <button class="btn btn-secondary" onclick="goTo('constructor')">← Volver</button>
       <button class="btn" id="lab-next" style="display:none;" onclick="nextLab()">Siguiente →</button>
-      <button class="btn hidden" id="lab-to-quiz" onclick="goTo('circuito')">Ir al Circuito →</button>
+      <button class="btn hidden" id="lab-to-quiz" onclick="goTo('simulador')">Ir al Simulador →</button>
     </div>
   </div>
 
-  <!-- CONSTRUCTOR DE CIRCUITOS -->
-  <div class="card hidden" id="screen-circuito">
-    <h2>⚡ Constructor de Circuitos</h2>
-    <p>Diseñá un circuito que <strong>encienda una luz (💡)</strong> combinando entradas (A, B) y compuertas lógicas. Probá todas las combinaciones y después <strong>exportá tu circuito</strong> para que tu docente lo verifique.</p>
+  <!-- SIMULADOR DE CIRCUITOS -->
+  <div class="card hidden" id="screen-simulador">
+    <h2>⚡ Simulador de Circuitos</h2>
+    <p>Diseñá tu circuito con <strong>hasta 4 compuertas encadenadas</strong>. Hacé clic en los interruptores A, B, C para activarlos. Los <strong>cables se iluminan en amarillo</strong> cuando pasa corriente (1). El objetivo es que el <strong>LED final se encienda</strong>.</p>
+    <p style="font-size:0.85rem; color:var(--muted);">📸 Cuando tengas tu circuito armado, <strong>sacá captura de pantalla</strong> y subila como tarea.</p>
 
-    <div class="form-group">
-      <label>Tu nombre</label>
-      <input class="form-input" id="circ-name" placeholder="Ej: Juan Pérez" maxlength="40">
-    </div>
-
-    <div class="form-group">
-      <label>Nombre de tu circuito</label>
-      <input class="form-input" id="circ-title" placeholder="Ej: Luz que se enciende cuando A y B están activos" maxlength="80">
-    </div>
-
-    <div class="circuit-canvas" id="circuit-canvas">
-      <div class="circuit-row">
-        <button class="circuit-input-btn" id="circ-a" onclick="toggleCircInput('a')">A: 0</button>
-        <span class="circuit-arrow">→</span>
-        <select class="circuit-gate-select" id="circ-gate" onchange="updateCircuit()">
+    <!-- CONTROLES -->
+    <div class="sim-controls">
+      <div class="sim-control-group">
+        <label>Compuerta 1</label>
+        <select id="gate1" onchange="updateCircuit()">
           <option value="AND">AND</option>
           <option value="OR">OR</option>
           <option value="NOT">NOT</option>
@@ -679,28 +774,64 @@
           <option value="XOR">XOR</option>
           <option value="XNOR">XNOR</option>
         </select>
-        <span class="circuit-arrow">←</span>
-        <button class="circuit-input-btn" id="circ-b" onclick="toggleCircInput('b')">B: 0</button>
       </div>
-      <div class="circuit-row">
-        <span class="circuit-arrow" style="font-size:2rem;">↓</span>
+      <div class="sim-control-group">
+        <label>Compuerta 2</label>
+        <select id="gate2" onchange="updateCircuit()">
+          <option value="NINGUNA">— Ninguna —</option>
+          <option value="AND">AND</option>
+          <option value="OR">OR</option>
+          <option value="NOT">NOT</option>
+          <option value="NAND">NAND</option>
+          <option value="NOR">NOR</option>
+          <option value="XOR">XOR</option>
+          <option value="XNOR">XNOR</option>
+        </select>
       </div>
-      <div class="circuit-row">
-        <div class="circuit-light off" id="circ-light">💡</div>
+      <div class="sim-control-group">
+        <label>Compuerta 3</label>
+        <select id="gate3" onchange="updateCircuit()">
+          <option value="NINGUNA">— Ninguna —</option>
+          <option value="AND">AND</option>
+          <option value="OR">OR</option>
+          <option value="NOT">NOT</option>
+          <option value="NAND">NAND</option>
+          <option value="NOR">NOR</option>
+          <option value="XOR">XOR</option>
+          <option value="XNOR">XNOR</option>
+        </select>
       </div>
-      <div class="circuit-row" style="margin-top:12px;">
-        <div class="circuit-node" id="circ-status">Luz: APAGADA</div>
+      <div class="sim-control-group">
+        <label>Compuerta 4</label>
+        <select id="gate4" onchange="updateCircuit()">
+          <option value="NINGUNA">— Ninguna —</option>
+          <option value="AND">AND</option>
+          <option value="OR">OR</option>
+          <option value="NOT">NOT</option>
+          <option value="NAND">NAND</option>
+          <option value="NOR">NOR</option>
+          <option value="XOR">XOR</option>
+          <option value="XNOR">XNOR</option>
+        </select>
       </div>
+      <button class="btn" onclick="testAll()">🧪 Probar las 8 combinaciones</button>
+      <button class="btn btn-danger" onclick="resetSim()">🔄 Reiniciar</button>
     </div>
 
-    <div style="text-align:center; margin-top:16px;">
-      <button class="btn" onclick="testCircuit()">🧪 Probar todas las combinaciones</button>
-      <button class="btn btn-secondary" onclick="exportCircuit()">📤 Exportar mi circuito</button>
-      <button class="btn btn-secondary" onclick="shareCircuit()">📱 Compartir al docente</button>
-      <button class="btn btn-danger" onclick="resetCircuit()">🔄 Reiniciar</button>
+    <!-- SIMULADOR VISUAL -->
+    <div class="simulator">
+      <div class="circuit-board" id="circuit-board"></div>
     </div>
 
-    <div id="circuit-result"></div>
+    <!-- INFO -->
+    <input type="text" class="form-input" id="student-name" placeholder="Tu nombre (aparece si sacás captura)" maxlength="40">
+    <div class="formula-box" id="formula">Fórmula: —</div>
+    <div class="truth-output" id="truth-output"></div>
+
+    <div style="text-align:center; margin-top:20px;">
+      <button class="btn btn-secondary" onclick="goTo('laboratorio')">← Volver</button>
+      <button class="btn" onclick="goTo('quiz')">Ir al Quiz →</button>
+    </div>
   </div>
 
   <!-- QUIZ -->
@@ -709,7 +840,7 @@
     <p>Respondé las preguntas. Tenés retroalimentación inmediata.</p>
     <div id="quiz-container"></div>
     <div style="text-align:center; margin-top:20px;">
-      <button class="btn btn-secondary" onclick="goTo('circuito')">← Volver</button>
+      <button class="btn btn-secondary" onclick="goTo('simulador')">← Volver</button>
       <button class="btn" id="btn-resultado" style="display:none;" onclick="mostrarResultado()">Ver Resultado →</button>
     </div>
   </div>
@@ -722,7 +853,7 @@
       <p id="final-message" style="font-size:1.1rem; margin-top:12px;"></p>
       <div style="margin-top:20px;">
         <button class="btn" onclick="reiniciar()">🔄 Reintentar</button>
-        <button class="btn" onclick="goTo('produccion')">🎨 Crear mi producción →</button>
+        <button class="btn" onclick="goTo('produccion')">🎨 Crear mi tarjeta →</button>
         <button class="btn btn-secondary" onclick="goTo('inicio')">🏠 Inicio</button>
       </div>
     </div>
@@ -731,7 +862,7 @@
   <!-- PRODUCCIÓN -->
   <div class="card hidden" id="screen-produccion">
     <h2>🎨 Mi Compuerta Favorita</h2>
-    <p>Elegí una compuerta, explicá con tus palabras qué hace y para qué sirve. Después podés <strong>descargarla</strong> o <strong>compartirla</strong>.</p>
+    <p>Elegí una compuerta, explicá con tus palabras qué hace y para qué sirve. Después podés <strong>descargarla</strong>.</p>
     <div class="form-group">
       <label>Tu nombre</label>
       <input class="form-input" id="prod-name" placeholder="Ej: Juan Pérez" maxlength="40">
@@ -762,28 +893,8 @@
     <div style="text-align:center; margin-top:16px;">
       <button class="btn" onclick="generateProdCard()">🎨 Generar mi tarjeta</button>
       <button class="btn btn-secondary" onclick="downloadProdCard()">📥 Descargar</button>
-      <button class="btn btn-secondary" onclick="shareProdCard()">📤 Compartir</button>
     </div>
     <div id="prod-result"></div>
-  </div>
-
-  <!-- CERTIFICADO -->
-  <div class="card hidden" id="screen-certificado">
-    <h2>🏆 Certificado de Logros</h2>
-    <p>Completá tu nombre y generá tu certificado. Después podés imprimirlo o guardarlo como PDF.</p>
-    <div class="form-group" style="max-width:400px; margin: 0 auto 16px;">
-      <label>Tu nombre completo</label>
-      <input class="form-input" id="cert-name" placeholder="Ej: Juan Pérez" maxlength="60">
-    </div>
-    <div class="form-group" style="max-width:400px; margin: 0 auto 16px;">
-      <label>Fecha</label>
-      <input class="form-input" type="date" id="cert-date">
-    </div>
-    <div style="text-align:center; margin-top:16px;">
-      <button class="btn" onclick="generateCertificate()">🏆 Generar certificado</button>
-      <button class="btn btn-secondary" onclick="printCertificate()">🖨️ Imprimir / Guardar PDF</button>
-    </div>
-    <div id="cert-result"></div>
   </div>
 </div>
 
@@ -791,41 +902,46 @@
 
 <script>
 // ============================================================
-// SÍMBOLOS SVG DE COMPUERTAS (AND, OR, NOT, NAND, NOR, XOR, XNOR)
+// SÍMBOLOS SVG
 // ============================================================
-const SVG_AND = `<svg viewBox="0 0 100 60" xmlns="http://www.w3.org/2000/svg">
+const SVG_AND = `<svg viewBox="0 0 100 70" xmlns="http://www.w3.org/2000/svg">
   <path d="M 10 10 L 45 10 A 25 25 0 0 1 45 60 L 10 60 Z"/>
-  <line x1="0" y1="22" x2="10" y2="22"/><line x1="0" y1="48" x2="10" y2="48"/>
+  <line x1="0" y1="25" x2="10" y2="25"/><line x1="0" y1="45" x2="10" y2="45"/>
   <line x1="70" y1="35" x2="100" y2="35"/></svg>`;
-const SVG_OR = `<svg viewBox="0 0 100 60" xmlns="http://www.w3.org/2000/svg">
-  <path d="M 5 10 Q 30 35 5 60 Q 40 55 60 35 Q 40 15 5 10 Z"/>
-  <line x1="0" y1="22" x2="12" y2="22"/><line x1="0" y1="48" x2="12" y2="48"/>
-  <line x1="60" y1="35" x2="100" y2="35"/></svg>`;
-const SVG_NOT = `<svg viewBox="0 0 100 60" xmlns="http://www.w3.org/2000/svg">
-  <polygon points="15,10 15,50 50,30"/>
-  <circle class="neg" cx="57" cy="30" r="5"/>
-  <line x1="0" y1="30" x2="15" y2="30"/><line x1="62" y1="30" x2="100" y2="30"/></svg>`;
-const SVG_NAND = `<svg viewBox="0 0 100 60" xmlns="http://www.w3.org/2000/svg">
+const SVG_OR = `<svg viewBox="0 0 100 70" xmlns="http://www.w3.org/2000/svg">
+  <path d="M 5 10 Q 35 35 5 60 Q 45 55 65 35 Q 45 15 5 10 Z"/>
+  <line x1="0" y1="25" x2="12" y2="25"/><line x1="0" y1="45" x2="12" y2="45"/>
+  <line x1="65" y1="35" x2="100" y2="35"/></svg>`;
+const SVG_NOT = `<svg viewBox="0 0 100 70" xmlns="http://www.w3.org/2000/svg">
+  <polygon points="15,15 15,55 55,35"/>
+  <circle class="neg" cx="62" cy="35" r="5"/>
+  <line x1="0" y1="35" x2="15" y2="35"/><line x1="67" y1="35" x2="100" y2="35"/></svg>`;
+const SVG_NAND = `<svg viewBox="0 0 100 70" xmlns="http://www.w3.org/2000/svg">
   <path d="M 10 10 L 45 10 A 25 25 0 0 1 45 60 L 10 60 Z"/>
   <circle class="neg" cx="73" cy="35" r="5"/>
-  <line x1="0" y1="22" x2="10" y2="22"/><line x1="0" y1="48" x2="10" y2="48"/>
+  <line x1="0" y1="25" x2="10" y2="25"/><line x1="0" y1="45" x2="10" y2="45"/>
   <line x1="78" y1="35" x2="100" y2="35"/></svg>`;
-const SVG_NOR = `<svg viewBox="0 0 100 60" xmlns="http://www.w3.org/2000/svg">
-  <path d="M 5 10 Q 30 35 5 60 Q 40 55 60 35 Q 40 15 5 10 Z"/>
-  <circle class="neg" cx="66" cy="35" r="5"/>
-  <line x1="0" y1="22" x2="12" y2="22"/><line x1="0" y1="48" x2="12" y2="48"/>
-  <line x1="71" y1="35" x2="100" y2="35"/></svg>`;
-const SVG_XOR = `<svg viewBox="0 0 100 60" xmlns="http://www.w3.org/2000/svg">
-  <path d="M 12 10 Q 37 35 12 60 Q 47 55 67 35 Q 47 15 12 10 Z"/>
-  <path d="M 4 10 Q 29 35 4 60" fill="none"/>
-  <line x1="0" y1="22" x2="10" y2="22"/><line x1="0" y1="48" x2="10" y2="48"/>
-  <line x1="67" y1="35" x2="100" y2="35"/></svg>`;
-const SVG_XNOR = `<svg viewBox="0 0 100 60" xmlns="http://www.w3.org/2000/svg">
-  <path d="M 12 10 Q 37 35 12 60 Q 47 55 67 35 Q 47 15 12 10 Z"/>
-  <path d="M 4 10 Q 29 35 4 60" fill="none"/>
-  <circle class="neg" cx="73" cy="35" r="5"/>
-  <line x1="0" y1="22" x2="10" y2="22"/><line x1="0" y1="48" x2="10" y2="48"/>
-  <line x1="78" y1="35" x2="100" y2="35"/></svg>`;
+const SVG_NOR = `<svg viewBox="0 0 100 70" xmlns="http://www.w3.org/2000/svg">
+  <path d="M 5 10 Q 35 35 5 60 Q 45 55 65 35 Q 45 15 5 10 Z"/>
+  <circle class="neg" cx="71" cy="35" r="5"/>
+  <line x1="0" y1="25" x2="12" y2="25"/><line x1="0" y1="45" x2="12" y2="45"/>
+  <line x1="76" y1="35" x2="100" y2="35"/></svg>`;
+const SVG_XOR = `<svg viewBox="0 0 100 70" xmlns="http://www.w3.org/2000/svg">
+  <path d="M 12 10 Q 42 35 12 60 Q 52 55 72 35 Q 52 15 12 10 Z"/>
+  <path d="M 3 10 Q 33 35 3 60" fill="none"/>
+  <line x1="0" y1="25" x2="10" y2="25"/><line x1="0" y1="45" x2="10" y2="45"/>
+  <line x1="72" y1="35" x2="100" y2="35"/></svg>`;
+const SVG_XNOR = `<svg viewBox="0 0 100 70" xmlns="http://www.w3.org/2000/svg">
+  <path d="M 12 10 Q 42 35 12 60 Q 52 55 72 35 Q 52 15 12 10 Z"/>
+  <path d="M 3 10 Q 33 35 3 60" fill="none"/>
+  <circle class="neg" cx="78" cy="35" r="5"/>
+  <line x1="0" y1="25" x2="10" y2="25"/><line x1="0" y1="45" x2="10" y2="45"/>
+  <line x1="83" y1="35" x2="100" y2="35"/></svg>`;
+
+const SVG_MAP = {
+  AND: SVG_AND, OR: SVG_OR, NOT: SVG_NOT,
+  NAND: SVG_NAND, NOR: SVG_NOR, XOR: SVG_XOR, XNOR: SVG_XNOR
+};
 
 // ============ DATOS ============
 const basicGates = [
@@ -864,7 +980,7 @@ const gateState = {};
 let currentLab = 0, labAnswered = false;
 let quizIndex = 0, quizScore = 0, quizAnswered = false;
 let currentScreen = 'inicio';
-let circA = 0, circB = 0;
+let simA = 0, simB = 0, simC = 0;
 
 // ============ TEMA ============
 function toggleTheme() {
@@ -882,18 +998,6 @@ function toggleTheme() {
   } catch {}
 })();
 
-// ============ VOZ ============
-function speak(text) {
-  if (!('speechSynthesis' in window)) { showToast('Tu navegador no soporta voz'); return; }
-  speechSynthesis.cancel();
-  const u = new SpeechSynthesisUtterance(text);
-  u.lang = 'es-AR'; u.rate = 1;
-  speechSynthesis.speak(u);
-}
-function speakIntro() {
-  speak('Bienvenido al laboratorio prosumidor de compuertas lógicas. Podés explorar las compuertas, practicar con tablas y expresiones, diseñar tu propio circuito eléctrico, hacer el quiz, crear tu tarjeta de compuerta favorita y generar tu certificado.');
-}
-
 // ============ NAVEGACIÓN ============
 function goTo(screen) {
   currentScreen = screen;
@@ -903,24 +1007,22 @@ function goTo(screen) {
 
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   const tabs = document.querySelectorAll('.tab');
-  const map = { inicio:0, basicas:1, derivadas:2, constructor:3, editor:4, laboratorio:5, circuito:6, quiz:7, resultado:7, produccion:8, certificado:9 };
+  const map = { inicio:0, basicas:1, derivadas:2, constructor:3, laboratorio:4, simulador:5, quiz:6, resultado:6, produccion:7 };
   if (map[screen] !== undefined && tabs[map[screen]]) tabs[map[screen]].classList.add('active');
 
   if (screen === 'basicas') renderBasicGates();
   if (screen === 'derivadas') renderDerivedGates();
   if (screen === 'constructor') renderConstructor();
-  if (screen === 'editor') renderEditor();
   if (screen === 'laboratorio') { currentLab = 0; labAnswered = false; renderLab(); }
-  if (screen === 'circuito') updateCircuit();
+  if (screen === 'simulador') { renderSim(); updateTruthOutput(); }
   if (screen === 'quiz') { quizIndex = 0; quizScore = 0; quizAnswered = false; renderQuiz(); }
   if (screen === 'produccion') updateProdGate();
-  if (screen === 'certificado') setDefaultDate();
 
   updateProgress(screen);
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 function updateProgress(screen) {
-  const steps = { inicio: 0, basicas: 8, derivadas: 16, constructor: 25, editor: 33, laboratorio: 42, circuito: 55, quiz: 70, resultado: 78, produccion: 88, certificado: 100 };
+  const steps = { inicio: 0, basicas: 10, derivadas: 20, constructor: 30, laboratorio: 40, simulador: 55, quiz: 75, resultado: 85, produccion: 100 };
   document.getElementById('progress').style.width = (steps[screen] || 0) + '%';
 }
 
@@ -975,7 +1077,7 @@ function toggleInput(prefix, idx, input) {
   outEl.className = 'output-display ' + (out === 1 ? 'output-1' : 'output-0');
 }
 
-// ============ CONSTRUCTOR DE TABLAS ============
+// ============ CONSTRUCTOR ============
 function renderConstructor() {
   const gateName = document.getElementById('constructor-gate').value;
   const gate = allGates[gateName];
@@ -1016,31 +1118,6 @@ function clearConstructor() {
   document.getElementById('constructor-feedback').innerHTML = '';
 }
 
-// ============ EDITOR ============
-function evalExpr(expr, vars) {
-  let js = expr.replace(/\bAND\b/gi, '&&').replace(/\bOR\b/gi, '||').replace(/\bXOR\b/gi, '!==').replace(/\bNOT\b/gi, '!').replace(/\b([ABC])\b/g, (m) => vars[m] ? '1' : '0');
-  try { const result = Function(`"use strict"; return (${js});`)(); return result ? 1 : 0; } catch { return null; }
-}
-function renderEditor() {
-  const expr = document.getElementById('expr-input').value.trim();
-  const result = document.getElementById('editor-result');
-  if (!expr) { result.innerHTML = '<div class="feedback info">Escribí una expresión para ver la tabla.</div>'; return; }
-  const vars = ['A','B','C'].filter(v => new RegExp(`\\b${v}\\b`).test(expr));
-  if (vars.length === 0) { result.innerHTML = '<div class="feedback err">La expresión debe incluir al menos una variable A, B o C.</div>'; return; }
-  const combos = [];
-  const n = vars.length;
-  for (let i = 0; i < Math.pow(2, n); i++) { const combo = {}; vars.forEach((v, j) => combo[v] = (i >> (n - 1 - j)) & 1); combos.push(combo); }
-  let html = `<h3>Tabla de verdad resultante</h3>`;
-  html += `<table class="truth-table" style="max-width:500px; margin:0 auto;">`;
-  html += `<tr>${vars.map(v => `<th>${v}</th>`).join('')}<th>Salida</th></tr>`;
-  combos.forEach(c => {
-    const val = evalExpr(expr, c);
-    html += `<tr>${vars.map(v => `<td>${c[v]}</td>`).join('')}<td style="font-weight:700; color:${val === 1 ? 'var(--green)' : 'var(--muted)'}">${val === null ? '?' : val}</td></tr>`;
-  });
-  html += `</table>`;
-  result.innerHTML = html;
-}
-
 // ============ LABORATORIO ============
 function renderLab() {
   const ex = labExercises[currentLab];
@@ -1076,132 +1153,165 @@ function checkLab(selected, btn) {
 }
 function nextLab() { if (currentLab < labExercises.length - 1) { currentLab++; renderLab(); } }
 
-// ============ CONSTRUCTOR DE CIRCUITOS ============
-function toggleCircInput(which) {
-  if (which === 'a') circA = circA === 1 ? 0 : 1;
-  if (which === 'b') circB = circB === 1 ? 0 : 1;
-  document.getElementById('circ-a').textContent = 'A: ' + circA;
-  document.getElementById('circ-a').classList.toggle('on', circA === 1);
-  document.getElementById('circ-b').textContent = 'B: ' + circB;
-  document.getElementById('circ-b').classList.toggle('on', circB === 1);
-  updateCircuit();
+// ============ SIMULADOR DE CIRCUITOS ============
+function applySimGate(name, a, b) {
+  switch(name) {
+    case 'AND': return (a === 1 && b === 1) ? 1 : 0;
+    case 'OR':  return (a === 1 || b === 1) ? 1 : 0;
+    case 'NOT': return a === 1 ? 0 : 1;
+    case 'NAND': return !(a === 1 && b === 1) ? 1 : 0;
+    case 'NOR':  return !(a === 1 || b === 1) ? 1 : 0;
+    case 'XOR':  return (a !== b) ? 1 : 0;
+    case 'XNOR': return (a === b) ? 1 : 0;
+    default: return 0;
+  }
+}
+
+function computeSimOutputs() {
+  const g1 = document.getElementById('gate1').value;
+  const g2 = document.getElementById('gate2').value;
+  const g3 = document.getElementById('gate3').value;
+  const g4 = document.getElementById('gate4').value;
+
+  const s1 = applySimGate(g1, simA, simB);
+  let s2 = s1, s3 = s1, s4 = s1;
+  if (g2 !== 'NINGUNA') { s2 = applySimGate(g2, s1, simC); s3 = s2; s4 = s2; }
+  if (g3 !== 'NINGUNA') { s3 = applySimGate(g3, s2, simA); s4 = s3; }
+  if (g4 !== 'NINGUNA') { s4 = applySimGate(g4, s3, simB); }
+
+  return { s1, s2, s3, s4, g1, g2, g3, g4 };
+}
+
+function renderSim() {
+  const board = document.getElementById('circuit-board');
+  if (!board) return;
+  const out = computeSimOutputs();
+
+  board.innerHTML = `
+    <div class="input-column">
+      <div class="input-switch ${simA === 1 ? 'on' : 'off'}" onclick="toggleSimInput('a')">
+        <div class="label">A</div>
+        <div class="switch-body">${simA}</div>
+      </div>
+      <div class="input-switch ${simB === 1 ? 'on' : 'off'}" onclick="toggleSimInput('b')">
+        <div class="label">B</div>
+        <div class="switch-body">${simB}</div>
+      </div>
+      <div class="input-switch ${simC === 1 ? 'on' : 'off'}" onclick="toggleSimInput('c')">
+        <div class="label">C</div>
+        <div class="switch-body">${simC}</div>
+      </div>
+    </div>
+
+    <div class="gate-stage">
+      <div class="gate-stage-title">Etapa 1</div>
+      <div class="wire ${simA === 1 ? 'on' : ''}"></div>
+      <div class="gate-visual">
+        <div class="gate-name">${out.g1}</div>
+        <div class="gate-body">${SVG_MAP[out.g1]}</div>
+        <div class="gate-output ${out.s1 === 1 ? 'on' : ''}">S1=${out.s1}</div>
+      </div>
+      <div class="wire ${simB === 1 ? 'on' : ''}"></div>
+    </div>
+
+    <div class="gate-stage">
+      <div class="gate-stage-title">Etapa 2</div>
+      <div class="wire ${out.s1 === 1 ? 'on' : ''}"></div>
+      <div class="gate-visual">
+        <div class="gate-name">${out.g2 === 'NINGUNA' ? '—' : out.g2}</div>
+        <div class="gate-body">${out.g2 === 'NINGUNA' ? '<svg viewBox="0 0 100 70"><line x1="10" y1="35" x2="90" y2="35" stroke="#475569" stroke-width="4" stroke-dasharray="5 5"/></svg>' : SVG_MAP[out.g2]}</div>
+        <div class="gate-output ${out.s2 === 1 ? 'on' : ''}">S2=${out.s2}</div>
+      </div>
+      <div class="wire ${simC === 1 ? 'on' : ''}"></div>
+    </div>
+
+    <div class="gate-stage">
+      <div class="gate-stage-title">Etapa 3</div>
+      <div class="wire ${out.s2 === 1 ? 'on' : ''}"></div>
+      <div class="gate-visual">
+        <div class="gate-name">${out.g3 === 'NINGUNA' ? '—' : out.g3}</div>
+        <div class="gate-body">${out.g3 === 'NINGUNA' ? '<svg viewBox="0 0 100 70"><line x1="10" y1="35" x2="90" y2="35" stroke="#475569" stroke-width="4" stroke-dasharray="5 5"/></svg>' : SVG_MAP[out.g3]}</div>
+        <div class="gate-output ${out.s3 === 1 ? 'on' : ''}">S3=${out.s3}</div>
+      </div>
+      <div class="wire ${simA === 1 ? 'on' : ''}"></div>
+    </div>
+
+    <div class="gate-stage">
+      <div class="gate-stage-title">Etapa 4</div>
+      <div class="wire ${out.s3 === 1 ? 'on' : ''}"></div>
+      <div class="gate-visual">
+        <div class="gate-name">${out.g4 === 'NINGUNA' ? '—' : out.g4}</div>
+        <div class="gate-body">${out.g4 === 'NINGUNA' ? '<svg viewBox="0 0 100 70"><line x1="10" y1="35" x2="90" y2="35" stroke="#475569" stroke-width="4" stroke-dasharray="5 5"/></svg>' : SVG_MAP[out.g4]}</div>
+        <div class="gate-output ${out.s4 === 1 ? 'on' : ''}">S4=${out.s4}</div>
+      </div>
+      <div class="wire ${simB === 1 ? 'on' : ''}"></div>
+    </div>
+
+    <div class="led-column">
+      <div class="gate-stage-title">Salida</div>
+      <div class="wire ${out.s4 === 1 ? 'on' : ''}"></div>
+      <div class="led ${out.s4 === 1 ? 'on' : 'off'}">${out.s4 === 1 ? '💡' : '⚫'}</div>
+      <div class="led-label ${out.s4 === 1 ? 'on' : 'off'}">${out.s4 === 1 ? 'ENCENDIDA' : 'APAGADA'}</div>
+    </div>
+  `;
+
+  const f = buildSimFormula(out);
+  document.getElementById('formula').textContent = 'Fórmula: ' + (f || '—');
+}
+
+function buildSimFormula(out) {
+  let f = out.g1 === 'NOT' ? `NOT(A)` : `(A ${out.g1} B)`;
+  if (out.g2 !== 'NINGUNA') f = out.g2 === 'NOT' ? `NOT(${f})` : `(${f} ${out.g2} C)`;
+  if (out.g3 !== 'NINGUNA') f = out.g3 === 'NOT' ? `NOT(${f})` : `(${f} ${out.g3} A)`;
+  if (out.g4 !== 'NINGUNA') f = out.g4 === 'NOT' ? `NOT(${f})` : `(${f} ${out.g4} B)`;
+  return f;
+}
+
+function toggleSimInput(which) {
+  if (which === 'a') simA = simA === 1 ? 0 : 1;
+  if (which === 'b') simB = simB === 1 ? 0 : 1;
+  if (which === 'c') simC = simC === 1 ? 0 : 1;
+  renderSim();
+  updateTruthOutput();
 }
 
 function updateCircuit() {
-  const gateName = document.getElementById('circ-gate').value;
-  const gate = allGates[gateName];
-  let out;
-  if (gateName === 'NOT') {
-    out = gate.fn(circA);
-  } else {
-    out = gate.fn(circA, circB);
+  if (currentScreen === 'simulador') { renderSim(); updateTruthOutput(); }
+}
+
+function updateTruthOutput() {
+  const el = document.getElementById('truth-output');
+  if (!el) return;
+  let text = `Tabla de verdad completa:\nA B C → S1 → S2 → S3 → S4 → Luz\n`;
+  text += '─────────────────────────────\n';
+  const origA = simA, origB = simB, origC = simC;
+  let encendidas = 0;
+  for (let i = 0; i < 8; i++) {
+    simA = (i >> 2) & 1;
+    simB = (i >> 1) & 1;
+    simC = i & 1;
+    const o = computeSimOutputs();
+    if (o.s4 === 1) encendidas++;
+    text += `${simA} ${simB} ${simC} → ${o.s1}  → ${o.s2}  → ${o.s3}  → ${o.s4}  → ${o.s4 === 1 ? '💡' : '⚫'}\n`;
   }
-  const light = document.getElementById('circ-light');
-  const status = document.getElementById('circ-status');
-  if (out === 1) {
-    light.classList.remove('off'); light.classList.add('on');
-    status.textContent = '💡 Luz: ENCENDIDA';
-    status.style.color = 'var(--green)';
-    status.style.fontWeight = '900';
-  } else {
-    light.classList.remove('on'); light.classList.add('off');
-    status.textContent = 'Luz: APAGADA';
-    status.style.color = 'var(--muted)';
-    status.style.fontWeight = '700';
-  }
+  simA = origA; simB = origB; simC = origC;
+  text += `─────────────────────────────\nLa luz se enciende en ${encendidas}/8 combinaciones`;
+  el.innerHTML = text;
 }
 
-function testCircuit() {
-  const gateName = document.getElementById('circ-gate').value;
-  const gate = allGates[gateName];
-  const isNot = gateName === 'NOT';
-  const combos = isNot ? [[0],[1]] : [[0,0],[0,1],[1,0],[1,1]];
-  let html = `<h3>🧪 Resultado de todas las combinaciones</h3>`;
-  html += `<table class="truth-table" style="max-width:500px; margin:0 auto;">`;
-  html += `<tr>${isNot ? '<th>A</th>' : '<th>A</th><th>B</th>'}<th>Salida</th><th>Luz</th></tr>`;
-  combos.forEach(c => {
-    const out = isNot ? gate.fn(c[0]) : gate.fn(c[0], c[1]);
-    const icon = out === 1 ? '💡 ENCENDIDA' : '⚫ apagada';
-    html += `<tr>${c.map(v => `<td>${v}</td>`).join('')}<td style="font-weight:700; color:${out === 1 ? 'var(--green)' : 'var(--muted)'}">${out}</td><td>${icon}</td></tr>`;
-  });
-  html += `</table>`;
-  document.getElementById('circuit-result').innerHTML = html;
-  showToast('🧪 Combinaciones probadas');
+function testAll() {
+  updateTruthOutput();
+  showToast('🧪 Tabla de verdad actualizada abajo');
 }
 
-function exportCircuit() {
-  const name = document.getElementById('circ-name').value.trim() || 'Estudiante';
-  const title = document.getElementById('circ-title').value.trim() || 'Circuito sin título';
-  const gateName = document.getElementById('circ-gate').value;
-  const gate = allGates[gateName];
-  const isNot = gateName === 'NOT';
-  const combos = isNot ? [[0],[1]] : [[0,0],[0,1],[1,0],[1,1]];
-
-  let code = `╔══════════════════════════════════════════╗
-║   CIRCUITO ELÉCTRICO BÁSICO              ║
-╚══════════════════════════════════════════╝
-
-Estudiante: ${name}
-Circuito: ${title}
-Compuerta usada: ${gateName} (${gate.expr})
-
-TABLA DE COMPORTAMIENTO:
-${isNot ? 'A → Salida → Luz' : 'A, B → Salida → Luz'}
-----------------------------------------
-`;
-  combos.forEach(c => {
-    const out = isNot ? gate.fn(c[0]) : gate.fn(c[0], c[1]);
-    const luz = out === 1 ? '💡 ENCENDIDA' : '⚫ apagada';
-    code += `${c.join(', ')} → ${out} → ${luz}\n`;
-  });
-  code += `----------------------------------------
-
-VERIFICACIÓN DOCENTE:
-[  ] El circuito es correcto
-[  ] La luz enciende en la combinación esperada
-[  ] Observaciones: _______________________
-
-IES N° 5 "José Eugenio Tello" — San Salvador de Jujuy
-Arquitectura de Computadoras — Compuertas Lógicas
-`;
-  downloadFile(code, `circuito_${gateName}_${name.replace(/\s+/g, '_')}.txt`, 'text/plain');
-  showToast('📤 Circuito exportado');
-}
-
-function shareCircuit() {
-  const name = document.getElementById('circ-name').value.trim() || 'Estudiante';
-  const title = document.getElementById('circ-title').value.trim() || 'Circuito sin título';
-  const gateName = document.getElementById('circ-gate').value;
-  const gate = allGates[gateName];
-  const isNot = gateName === 'NOT';
-  const combos = isNot ? [[0],[1]] : [[0,0],[0,1],[1,0],[1,1]];
-
-  let text = `⚡ CIRCUITO ELÉCTRICO BÁSICO\n\n`;
-  text += `Estudiante: ${name}\n`;
-  text += `Circuito: ${title}\n`;
-  text += `Compuerta: ${gateName}\n\n`;
-  combos.forEach(c => {
-    const out = isNot ? gate.fn(c[0]) : gate.fn(c[0], c[1]);
-    text += `${c.join(',')} → ${out} → ${out === 1 ? '💡 ENCENDIDA' : '⚫ apagada'}\n`;
-  });
-  text += `\nVerificá mi circuito, profe 🙌`;
-
-  if (navigator.share) {
-    navigator.share({ title: 'Mi circuito eléctrico', text }).catch(() => {});
-  } else {
-    navigator.clipboard.writeText(text).then(() => showToast('📋 Copiado al portapapeles'));
-  }
-}
-
-function resetCircuit() {
-  circA = 0; circB = 0;
-  document.getElementById('circ-a').textContent = 'A: 0';
-  document.getElementById('circ-a').classList.remove('on');
-  document.getElementById('circ-b').textContent = 'B: 0';
-  document.getElementById('circ-b').classList.remove('on');
-  document.getElementById('circ-gate').value = 'AND';
-  document.getElementById('circuit-result').innerHTML = '';
-  updateCircuit();
+function resetSim() {
+  simA = 0; simB = 0; simC = 0;
+  document.getElementById('gate1').value = 'AND';
+  document.getElementById('gate2').value = 'NINGUNA';
+  document.getElementById('gate3').value = 'NINGUNA';
+  document.getElementById('gate4').value = 'NINGUNA';
+  renderSim();
+  updateTruthOutput();
   showToast('🔄 Circuito reiniciado');
 }
 
@@ -1284,45 +1394,6 @@ function downloadProdCard() {
   const text = `MI COMPUERTA FAVORITA: ${d.gateName}\n========================================\n\n¿Qué hace?\n${d.what}\n\n¿Para qué sirve?\n${d.use}\n\n----------------------------------------\nProducido por: ${d.name}\nFecha: ${d.date}\nIES N° 5 "José Eugenio Tello" — San Salvador de Jujuy\n`;
   downloadFile(text, `mi_compuerta_${d.gateName}.txt`, 'text/plain');
 }
-function shareProdCard() {
-  if (!window._lastProdCard) { showToast('Primero generá tu tarjeta'); return; }
-  const d = window._lastProdCard;
-  const text = `🎨 Mi compuerta favorita: ${d.gateName}\n\n¿Qué hace? ${d.what}\n\n¿Para qué sirve? ${d.use}\n\n— Producido por ${d.name} (IES N° 5, Jujuy)`;
-  if (navigator.share) navigator.share({ title: 'Mi compuerta favorita', text }).catch(() => {});
-  else navigator.clipboard.writeText(text).then(() => showToast('📋 Copiado al portapapeles'));
-}
-
-// ============ CERTIFICADO ============
-function setDefaultDate() {
-  const today = new Date().toISOString().split('T')[0];
-  const el = document.getElementById('cert-date');
-  if (el && !el.value) el.value = today;
-}
-function generateCertificate() {
-  const name = document.getElementById('cert-name').value.trim();
-  const date = document.getElementById('cert-date').value;
-  if (!name) { showToast('⚠️ Escribí tu nombre'); return; }
-  const dateFormatted = date ? new Date(date + 'T12:00:00').toLocaleDateString('es-AR', { year: 'numeric', month: 'long', day: 'numeric' }) : new Date().toLocaleDateString('es-AR');
-  const result = document.getElementById('cert-result');
-  result.innerHTML = `
-    <div class="certificate" id="cert-canvas">
-      <h2>🏆 Certificado de Logros</h2>
-      <div class="cert-text">Se certifica que</div>
-      <div class="cert-name">${escapeHtml(name)}</div>
-      <div class="cert-text">completó el <strong>Laboratorio Interactivo de Compuertas Lógicas</strong><br>
-        correspondiente a la unidad curricular <strong>Arquitectura de Computadoras</strong><br>
-        de la <strong>Tecnicatura Superior en Soporte de Infraestructura de TI</strong></div>
-      <div class="cert-text" style="margin-top:16px;">Temas abordados: AND, OR, NOT, NAND, NOR, XOR, XNOR</div>
-      <div class="cert-date">San Salvador de Jujuy, ${dateFormatted}</div>
-      <div class="cert-seal">🎓</div>
-      <div style="margin-top:12px; font-size:0.8rem; color:#64748b;">IES N° 5 "José Eugenio Tello"</div>
-    </div>`;
-  showToast('🏆 Certificado generado');
-}
-function printCertificate() {
-  if (!document.getElementById('cert-canvas')) { showToast('Primero generá el certificado'); return; }
-  window.print();
-}
 
 // ============ UTILIDADES ============
 function downloadFile(content, filename, type) {
@@ -1343,7 +1414,6 @@ function showToast(msg) {
 
 document.addEventListener('DOMContentLoaded', () => {
   updateProgress('inicio');
-  setDefaultDate();
 });
 </script>
 </body>
